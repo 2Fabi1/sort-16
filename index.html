@@ -276,7 +276,7 @@
         function startGame() {
             let choice = parseInt(gebi("choice").value);
             let label1 = document.querySelector(".label1");
-
+            let bracketPos = 0;
             if (choice < 8 || choice > 36) {  
                 label1.textContent = "Select number from 8 to 36!";
                 label1.style.color = "red";
@@ -368,3 +368,4 @@
     </script>
 </body>
 </html>
+
