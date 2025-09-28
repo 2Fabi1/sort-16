@@ -152,3 +152,50 @@ function bracket_first_x(text, start, x) {
     let second_part = spaced_list.slice(x).join("  ");
     return first_part + (second_part ? "  " + second_part : "");
 }
+
+const secretKey = "Sort16SecretKey123";
+
+function exportRecords() {
+
+    const data = {
+        records: records
+    };
+    const jsonStr = JSON.stringify(data);
+    const encrypted = CryptoJS.AES.encrypt(jsonStr, secretKey).toString();
+    const encoded = btoa(encrypted);
+    navigator.clipboard.writeText(encoded).then(() => {
+        alert("Game records copied to clipboard!");
+    }).catch(() => {
+        alert("Failed to copy. Here’s the string:\n" + encoded);
+    });
+}
+
+function importRecords() {
+    const input = prompt("Paste your saved records string:");
+    if (!input) return;
+    try {
+        const encrypted = atob(input);
+        const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+        const data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+        if (data.records && Array.isArray(data.records)) {
+            records = data.records;
+            updateRecordDisplay();
+            alert("Records imported successfully!");
+        } else {
+            alert("Invalid data!");
+        }
+    } catch (e) {
+        alert("Failed to import records. The string may be invalid.");
+    }
+}
+
+function updateRecordDisplay() {
+    for (let i = 8; i <= 36; i++) {
+        const recordLabel = gebi(i.toString());
+        const rec = records[i - 8];
+        recordLabel.textContent = `${i}: ${rec ? (rec / 1000).toFixed(3) + 's' : '--:--.---'}`;
+    }
+}
+
+gebi("exportBtn").onclick = exportRecords;
+gebi("importBtn").onclick = importRecords;
