@@ -361,11 +361,17 @@
             let chars = text.split("");
             let spaced_chars = chars.join("  ");
             let spaced_list = spaced_chars.split("  ");
+            
+            // Ensure x doesn't exceed text length
+            x = Math.min(x, text.length);
+            
             let first_part = spaced_list.slice(0, start).join("  ") + " [ " + spaced_list.slice(start, x).join("  ") + " ]";
             let second_part = spaced_list.slice(x).join("  ");
             return first_part + (second_part ? "  " + second_part : "");
         }
+
     </script>
 </body>
 </html>
+
 
