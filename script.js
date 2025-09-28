@@ -95,7 +95,7 @@ function startGame() {
     timerInterval = setInterval(() => {
         let elapsed = Date.now() - startTime;
         label1.textContent = `Time: ${(elapsed / 1000).toFixed(3)} s`;
-    }, 1);
+    }, 10);
 
     dropdown.style.display = "none";
     button.style.display = "none";
