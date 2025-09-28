@@ -177,6 +177,34 @@
         #themeIcon {
             pointer-events: none;
         }
+        .mobileControls {
+            margin-top: 150px;
+            width: 100%;
+            display: flex;
+            flex-direction: column; /* stack bracket-controls and char-controls vertically */
+            text-align: center;
+            gap: 10px; /* spacing between lines */ 
+        }
+
+        .mobileControls div {
+            display: flex;
+            justify-content: center;
+            gap: 10px; /* spacing between buttons in each row */
+        }
+        .mobileControls button {
+            height: 100px;
+            width: 150px;
+            font-size: 20px;
+        }
+
+        .mobileControls p {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 28px;
+            justify-content: center;
+            align-self: center;
+        }
+
     </style>
 </head>
 <body data-theme="light">
@@ -198,7 +226,17 @@
         <p id="main"></p>
         <button onclick="startGame()" id="restart" style="display:none">Restart</button>
         <button onclick="mainMenu()" id="menu" style="display:none">Main menu</button>
-        <p>Sponsored by Mr. Breast</p>
+        <div class="mobileControls">
+            <h2>Mobile Controls:</h2>
+            <div class="bracket-controls">
+                <p>Brackets:</p>
+                <button onclick="keyHandler({key: 'a'})">Left</button>
+                <button onclick="keyHandler({key: 'd'})">Right</button>
+                <p>Characters:</p>
+                <button onclick="keyHandler({key: 'ArrowLeft'})">Shift left</button>
+                <button onclick="keyHandler({key: 'ArrowRight'})">Shift right</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -276,7 +314,7 @@
         function startGame() {
             let choice = parseInt(gebi("choice").value);
             let label1 = document.querySelector(".label1");
-            let bracketPos = 0;
+
             if (choice < 8 || choice > 36) {  
                 label1.textContent = "Select number from 8 to 36!";
                 label1.style.color = "red";
@@ -301,6 +339,7 @@
 
             mainString = createString(choice); 
             bracketSize = Math.ceil(choice / 2);
+            bracketPos = 0;
             let label2 = gebi("main");
             label2.textContent = bracket_first_x(mainString, 0, bracketSize);
             
@@ -327,7 +366,7 @@
             let elapsed = Date.now() - startTime;
             let label1 = document.querySelector(".label1");
             label1.style.color = "green";
-
+            bracketPos = 0;
             let label2 = gebi("main");
             label2.textContent = "";
 
@@ -368,10 +407,8 @@
             let first_part = spaced_list.slice(0, start).join("  ") + " [ " + spaced_list.slice(start, x).join("  ") + " ]";
             let second_part = spaced_list.slice(x).join("  ");
             return first_part + (second_part ? "  " + second_part : "");
-        }
+        }   
 
     </script>
 </body>
 </html>
-
-
