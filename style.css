@@ -197,6 +197,10 @@ button:active {
     justify-content: center;
     align-self: center;
 }
+
+#label1 {
+    color: var(--text-color);
+}
 @media (max-width: 1200px) {
     body {
         flex-direction: column; /* stack vertically */
