@@ -24,6 +24,7 @@ const template = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 let bracketPos = 0;
 let bracketSize = 0;
 let mainString = "";
+let gameActive = false;
 
 let records = Array(29).fill(null);
 
@@ -46,6 +47,7 @@ for(let i = 8; i <= 36; i++) {
 }
 
 function keyHandler(event) {
+    if (!gameActive) return;
     let keyPressed = event.key;
     let stringLen = mainString.length;
     let shifting = mainString.slice(bracketPos, bracketPos + bracketSize);
@@ -90,6 +92,7 @@ function startGame() {
     restart.style.display = "inline";
     mainmenu.style.display = "inline";
 
+    gameActive = false;
     mainString = createString(choice);
     bracketSize = Math.ceil(choice / 2);
     bracketPos = 0;
@@ -116,7 +119,7 @@ function winGame() {
     label1.style.color = "green";
     bracketPos = 0;
     document.getElementById("main").textContent = "";
-
+    gameActive = false;
     let recordLabel = document.getElementById(mainString.length.toString());
     if (records[mainString.length - 8] === null || elapsed < records[mainString.length - 8]) {
         records[mainString.length - 8] = elapsed;
