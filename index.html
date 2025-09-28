@@ -19,6 +19,7 @@
 
     <div class="mainmenu">
         <h1>Sort16</h1>
+        <h2 id="difficulty"></h2>
         <h3 class="label1">Select character number (8-36): </h3>
         <select id="choice"></select>
         <button onclick="startGame()" id="play">Play</button>
@@ -36,6 +37,7 @@
                 <button onclick="keyHandler({key: 'ArrowRight'})">Shift right</button>
             </div>
         </div>
+        <div id="tooltip" style="position:absolute; display:none; background:var(--panel-bg); color:var(--text-color); padding:6px 10px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.2); pointer-events:none; z-index:100;"></div>
         <div style="margin-top: 20px;">
             <button onclick="exportRecords()">Export Records</button>
             <button onclick="importRecords()">Import Records</button>

@@ -30,17 +30,19 @@ let gameActive = false;
 
 let records = Array(29).fill(null);
 let completions = Array(29).fill(0);
+let averageTimes = Array(29).fill(0);
 
 const recordList = document.getElementById('record-list');
 const dropdown = document.getElementById('choice');
 const button = document.getElementById("play");
 const restart = document.getElementById("restart");
 const mainmenu = document.getElementById("menu");
+const difficulty = document.getElementById("difficulty");
 
 for(let i = 8; i <= 36; i++) {
     const p = document.createElement('p');
     p.id = i;
-    p.textContent = `${i}: --:--.--- | Completions: 0`;
+    p.textContent = `${i}: --:--.---`;
     recordList.appendChild(p);
 
     const option = document.createElement('option');
@@ -48,6 +50,8 @@ for(let i = 8; i <= 36; i++) {
     option.textContent = i;
     dropdown.appendChild(option);
 }
+
+updateRecordDisplay();
 
 function keyHandler(event) {
     if (!gameActive) return;
@@ -72,8 +76,9 @@ function keyHandler(event) {
 function startGame() {
     let choice = parseInt(dropdown.value);
     let label1 = document.querySelector(".label1");
-    const theme = document.body.getAttribute('data-theme');
+    difficulty.textContent = `Difficulty: ${choice} characters`;
     label1.style.color = "";
+
     
     if (choice < 8 || choice > 36) {  
         label1.textContent = "Select number from 8 to 36!";
@@ -113,6 +118,7 @@ function mainMenu() {
     button.style.display = "inline";
     restart.style.display = "none";
     mainmenu.style.display = "none";
+    difficulty.textContent = "";
     document.getElementById("main").textContent = "";
     document.removeEventListener("keydown", keyHandler);
 }
@@ -127,15 +133,18 @@ function winGame() {
     gameActive = false;
     let recordLabel = document.getElementById(mainString.length.toString());
     let idx = mainString.length - 8;
-    completions[idx]++;
     if (records[idx] === null || elapsed < records[idx]) {
         records[idx] = elapsed;
         recordLabel.textContent = `${mainString.length}: ${(elapsed / 1000).toFixed(3)}s`;
     }
-    recordLabel.textContent += ` | Completions: ${completions[idx]}`;
-    updateRecordDisplay();
     label1.textContent = `You win! Time: ${(elapsed / 1000).toFixed(3)} s. Record: ${(records[idx] / 1000).toFixed(3)} s`;
     document.removeEventListener("keydown", keyHandler);
+
+    //stats update
+    completions[idx]++;
+    averageTimes[idx] = ((averageTimes[idx] * (completions[idx] - 1)) + elapsed) / completions[idx];
+
+    updateRecordDisplay();
 }
 
 function createString(len) {
@@ -167,7 +176,8 @@ function exportRecords() {
 
     const data = {
         records: records,
-        completions: completions
+        completions: completions,
+        averageTimes: averageTimes
     };
     const jsonStr = JSON.stringify(data);
     const encrypted = CryptoJS.AES.encrypt(jsonStr, secretKey).toString();
@@ -188,6 +198,8 @@ function importRecords() {
         const data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
         if (data.records && Array.isArray(data.records)) {
             records = data.records;
+            completions = data.completions;
+            averageTimes = data.averageTimes;
             updateRecordDisplay();
             alert("Records imported successfully!");
         } else {
@@ -198,10 +210,37 @@ function importRecords() {
     }
 }
 
+const tooltip = document.getElementById('tooltip');
+
 function updateRecordDisplay() {
     for (let i = 8; i <= 36; i++) {
         const recordLabel = document.getElementById(i.toString());
         const rec = records[i - 8];
-        recordLabel.textContent = `${i}: ${rec ? (rec / 1000).toFixed(3) + 's' : '--:--.---'} | Completions: ${completions[i - 8]}`;
+        const avg = averageTimes[i - 8];
+        const comp = completions[i - 8];
+
+        recordLabel.textContent = `${i}: ${rec ? (rec / 1000).toFixed(3) + 's' : '--:--.---'}`;
+
+        recordLabel.onmouseenter = null;
+        recordLabel.onmousemove = null;
+        recordLabel.onmouseleave = null;
+
+        recordLabel.addEventListener('mouseenter', (e) => {
+            tooltip.style.display = 'block';
+            tooltip.textContent = rec !== null
+                ? `Completions: ${comp} | Average: ${(avg / 1000).toFixed(3)}s`
+                : "No completions yet";
+        });
+
+        recordLabel.addEventListener('mousemove', (e) => {
+            tooltip.style.left = (e.pageX + 10) + 'px';
+            tooltip.style.top = (e.pageY + 10) + 'px';
+        });
+
+        recordLabel.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
     }
 }
+
+
