@@ -199,7 +199,7 @@ function importRecords() {
 
 function updateRecordDisplay() {
     for (let i = 8; i <= 36; i++) {
-        const recordLabel = gebi(i.toString());
+        const recordLabel = document.getElementById(i.toString());
         const rec = records[i - 8];
         recordLabel.textContent = `${i}: ${rec ? (rec / 1000).toFixed(3) + 's' : '--:--.---'} | Completions: ${completions[i - 8]}`;
     }
