@@ -5,6 +5,8 @@ function updateIcon(theme) {
     themeIcon.textContent = theme === 'dark' ? '🌞' : '🌙';
 }
 
+function gebi(id) { return document.getElementById(id); }
+
 toggle.addEventListener('click', () => {
     const currentTheme = document.body.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -27,6 +29,7 @@ let mainString = "";
 let gameActive = false;
 
 let records = Array(29).fill(null);
+let completions = Array(29).fill(0);
 
 const recordList = document.getElementById('record-list');
 const dropdown = document.getElementById('choice');
@@ -37,7 +40,7 @@ const mainmenu = document.getElementById("menu");
 for(let i = 8; i <= 36; i++) {
     const p = document.createElement('p');
     p.id = i;
-    p.textContent = `${i}: --:--.---`;
+    p.textContent = `${i}: --:--.--- | Completions: 0`;
     recordList.appendChild(p);
 
     const option = document.createElement('option');
@@ -92,7 +95,7 @@ function startGame() {
     restart.style.display = "inline";
     mainmenu.style.display = "inline";
 
-    gameActive = false;
+    gameActive = true;
     mainString = createString(choice);
     bracketSize = Math.ceil(choice / 2);
     bracketPos = 0;
@@ -121,12 +124,15 @@ function winGame() {
     document.getElementById("main").textContent = "";
     gameActive = false;
     let recordLabel = document.getElementById(mainString.length.toString());
-    if (records[mainString.length - 8] === null || elapsed < records[mainString.length - 8]) {
-        records[mainString.length - 8] = elapsed;
+    let idx = mainString.length - 8;
+    completions[idx]++;
+    if (records[idx] === null || elapsed < records[idx]) {
+        records[idx] = elapsed;
         recordLabel.textContent = `${mainString.length}: ${(elapsed / 1000).toFixed(3)}s`;
     }
-
-    label1.textContent = `You win! Time: ${(elapsed / 1000).toFixed(3)} s. Record: ${(records[mainString.length - 8] / 1000).toFixed(3)} s`;
+    recordLabel.textContent += ` | Completions: ${completions[idx]}`;
+    updateRecordDisplay();
+    label1.textContent = `You win! Time: ${(elapsed / 1000).toFixed(3)} s. Record: ${(records[idx] / 1000).toFixed(3)} s`;
     document.removeEventListener("keydown", keyHandler);
 }
 
@@ -158,7 +164,8 @@ const secretKey = "Sort16SecretKey123";
 function exportRecords() {
 
     const data = {
-        records: records
+        records: records,
+        completions: completions
     };
     const jsonStr = JSON.stringify(data);
     const encrypted = CryptoJS.AES.encrypt(jsonStr, secretKey).toString();
@@ -193,7 +200,7 @@ function updateRecordDisplay() {
     for (let i = 8; i <= 36; i++) {
         const recordLabel = gebi(i.toString());
         const rec = records[i - 8];
-        recordLabel.textContent = `${i}: ${rec ? (rec / 1000).toFixed(3) + 's' : '--:--.---'}`;
+        recordLabel.textContent = `${i}: ${rec ? (rec / 1000).toFixed(3) + 's' : '--:--.---'} | Completions: ${completions[i - 8]}`;
     }
 }
 
