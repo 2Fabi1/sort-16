@@ -204,6 +204,3 @@ function updateRecordDisplay() {
         recordLabel.textContent = `${i}: ${rec ? (rec / 1000).toFixed(3) + 's' : '--:--.---'} | Completions: ${completions[i - 8]}`;
     }
 }
-
-gebi("exportBtn").onclick = exportRecords;
-gebi("importBtn").onclick = importRecords;
