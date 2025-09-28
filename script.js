@@ -72,14 +72,15 @@ function keyHandler(event) {
 function startGame() {
     let choice = parseInt(dropdown.value);
     let label1 = document.querySelector(".label1");
-    label1.style.color = "black";
+    const theme = document.body.getAttribute('data-theme');
+    label1.style.color = theme === 'dark' ? 'white' : 'black';
     
     if (choice < 8 || choice > 36) {  
         label1.textContent = "Select number from 8 to 36!";
         label1.style.color = "red";
         setTimeout(() => {
             label1.textContent = "Select character number (8-36): ";
-            label1.style.color = "black";
+            label1.style.color = theme === 'dark' ? 'white' : 'black';
         }, 1000);
         return;
     }
