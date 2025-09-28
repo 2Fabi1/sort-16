@@ -72,7 +72,8 @@ function keyHandler(event) {
 function startGame() {
     let choice = parseInt(dropdown.value);
     let label1 = document.querySelector(".label1");
-
+    label1.style.color = "black";
+    
     if (choice < 8 || choice > 36) {  
         label1.textContent = "Select number from 8 to 36!";
         label1.style.color = "red";
