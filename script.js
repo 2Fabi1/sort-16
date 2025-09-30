@@ -27,6 +27,8 @@ let bracketPos = 0;
 let bracketSize = 0;
 let mainString = "";
 let gameActive = false;
+let seed = "";
+let movesArr = [];
 
 let records = Array(29).fill(null);
 let completions = Array(29).fill(0);
@@ -38,6 +40,8 @@ const button = document.getElementById("play");
 const restart = document.getElementById("restart");
 const mainmenu = document.getElementById("menu");
 const difficulty = document.getElementById("difficulty");
+const sol = document.getElementById("solution");
+const reveal = document.getElementById("reveal");
 
 for(let i = 8; i <= 36; i++) {
     const p = document.createElement('p');
@@ -60,12 +64,22 @@ function keyHandler(event) {
     let shifting = mainString.slice(bracketPos, bracketPos + bracketSize);
     let label2 = document.getElementById("main");
 
-    if (keyPressed === "a" && bracketPos > 0) bracketPos--;
-    else if (keyPressed === "d" && bracketPos + bracketSize < stringLen) bracketPos++;
-    else if (keyPressed === "ArrowLeft" && shifting) 
+    if (keyPressed === "a" && bracketPos > 0){
+        bracketPos--;
+        movesArr.push("BracketLeft")
+    }
+    else if (keyPressed === "d" && bracketPos + bracketSize < stringLen){ 
+        bracketPos++;
+        movesArr.push("BracketRight")
+    }
+    else if (keyPressed === "ArrowLeft" && shifting) {
         mainString = mainString.slice(0, bracketPos) + shiftByOne(shifting, "left") + mainString.slice(bracketPos + bracketSize);
-    else if (keyPressed === "ArrowRight" && shifting) 
+        movesArr.push("CharsLeft");
+    }
+    else if (keyPressed === "ArrowRight" && shifting) {
         mainString = mainString.slice(0, bracketPos) + shiftByOne(shifting, "right") + mainString.slice(bracketPos + bracketSize);
+        movesArr.push("CharsRight");
+    }
     else return;
 
     label2.textContent = bracket_first_x(mainString, bracketPos, bracketPos + bracketSize);
@@ -104,6 +118,8 @@ function startGame() {
 
     gameActive = true;
     mainString = createString(choice);
+    seed = mainString;
+    movesArr = [];
     bracketSize = Math.ceil(choice / 2);
     bracketPos = 0;
     document.getElementById("main").textContent = bracket_first_x(mainString, 0, bracketSize);
@@ -118,6 +134,7 @@ function mainMenu() {
     button.style.display = "inline";
     restart.style.display = "none";
     mainmenu.style.display = "none";
+    reveal.style.display = "none";
     difficulty.textContent = "";
     document.getElementById("main").textContent = "";
     document.removeEventListener("keydown", keyHandler);
@@ -139,6 +156,8 @@ function winGame() {
     }
     label1.textContent = `You win! Time: ${(elapsed / 1000).toFixed(3)} s. Record: ${(records[idx] / 1000).toFixed(3)} s`;
     document.removeEventListener("keydown", keyHandler);
+    difficulty.textContent += "\nSeed: "+seed+"\nMoves: "+movesArr.length;
+    reveal.style.display = "inline-block";
 
     //stats update
     completions[idx]++;
@@ -169,6 +188,12 @@ function bracket_first_x(text, start, x) {
     let second_part = spaced_list.slice(x).join("  ");
     return first_part + (second_part ? "  " + second_part : "");
 }
+
+function showMoves() {
+    sol.textContent = movesArr.join(",");
+    sol.style.display = "block";
+}
+
 
 const secretKey = "Sort16SecretKey123";
 

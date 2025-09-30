@@ -198,6 +198,15 @@ button:active {
     align-self: center;
 }
 
+#solution, #difficulty {
+    white-space: pre-wrap;     /* preserves spaces and allows line breaks */
+    word-break: break-word;    /* breaks long sequences */
+    overflow-wrap: break-word; /* ensures wrapping in older browsers */
+    text-align: center;        /* optional: center the text */
+    max-width: 100%;           /* prevents horizontal overflow */
+}
+
+
 #label1 {
     color: var(--text-color);
 }
