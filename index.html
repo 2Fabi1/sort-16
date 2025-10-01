@@ -12,51 +12,23 @@
         <span id="themeIcon">🌙</span>
     </button>
 
-    <!-- Login Modal -->
-    <div id="loginModal" class="auth-modal">
-    <div class="auth-modal-content">
-        <h2>Login</h2>
-        <input type="text" id="loginUsername" placeholder="Username">
-        <input type="password" id="loginPassword" placeholder="Password">
-        <button onclick="login()">Login</button>
-        <p>Don't have an account? <span class="link" onclick="switchToSignup()">Create one</span></p>
-    </div>
-    </div>
-
-    <!-- Signup Modal -->
-    <div id="signupModal" class="auth-modal">
-    <div class="auth-modal-content">
-        <h2>Create Account</h2>
-        <input type="text" id="signupUsername" placeholder="Username">
-        <input type="password" id="signupPassword" placeholder="Password">
-        <button onclick="signup()">Create Account</button>
-        <p>Already have an account? <span class="link" onclick="switchToLogin()">Login</span></p>
-    </div>
-    </div>
-
-
-
-
     <div class="records">
         <h2>Records (s):</h2>
         <div id="record-list"></div>
     </div>
 
     <div class="mainmenu">
-        <div class="mainmenu-header">
-            <p id="loggedin" style="display: none">Logged in as: </p>
-            <button id="logout" onclick="logOut()" style="display: none">Log out</button>
-            <h1 id="mainheader">Sort16</h1>
-        </div>
+        <h1>Sort16</h1>
         <h2 id="difficulty"></h2>
         <h3 class="label1">Select character number (8-36): </h3>
         <select id="choice"></select>
         <button onclick="startGame()" id="play">Play</button>
-        <button id="tutorialBtn" onclick="tutorial()">Tutorial</button>
         <p id="main"></p>
         <button onclick="startGame()" id="restart" style="display:none">Restart</button>
         <button onclick="mainMenu()" id="menu" style="display:none">Main menu</button>
-        <div id="mobileControls" style="display:none">
+        <button onclick="showMoves()" id="reveal" style="display:none">Reveal solution</button>
+        <span id="solution"></span>
+        <div class="mobileControls">
             <h2>Mobile Controls:</h2>
             <div class="bracket-controls">
                 <p>Brackets:</p>
@@ -67,92 +39,15 @@
                 <button onclick="keyHandler({key: 'ArrowRight'})">Shift right</button>
             </div>
         </div>
-        <div id="tooltip"></div>
-    </div>
-    <div id="tutorialModal" class="modal inactive">
-    <div class="modal-content">
-        <span id="closeTutorial" class="close">&times;</span>
-        <h2>How to Play</h2>
-        <p>Welcome to <strong>Sort16</strong>!</p>
-        <div class="tutorial-row">
-            <span class="key">A</span>
-            <span class="text">Moves the bracket to the left</span>
+        <div id="tooltip" style="position:absolute; display:none; background:var(--panel-bg); color:var(--text-color); padding:6px 10px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.2); pointer-events:none; z-index:100;"></div>
+        <div style="margin-top: 20px;">
+            <button onclick="exportRecords()">Export Records</button>
+            <button onclick="importRecords()">Import Records</button>
         </div>
-
-        <div class="tutorial-row">
-            <span class="key">D</span>
-            <span class="text">Moves the bracket to the right</span>
-        </div>
-
-        <div class="tutorial-row">
-            <span class="key">←</span>
-            <span class="text">Shift characters inside the bracket left</span>
-        </div>
-
-        <div class="tutorial-row">
-            <span class="key">→</span>
-            <span class="text">Shift characters inside the bracket right</span>
-        </div>
-
-        <h2 id="goal">Goal</h2>
-        <p id="scrambled">Sort the scrambled into the original form - 0-9,A-Z!</p>
-        <p id="try">Here, try it out:</p>
-        <p id="tutorial_string"></p>
-
-    </div>
     </div>
 
-    <div id="winPopup" class="popup hidden">
-    <div class="popup-content">
-        <span id="closePopup" class="close">&times;</span>
-        <h1>YOU WIN!</h1>
-        <table class="popup-stats">
-            <tbody>
-                <tr>
-                <th class="left">Difficulty</th>
-                <th class="right">Time</th>
-                </tr>
-                <tr>
-                <td id="popupDifficulty" class="left"></td>
-                <td class="right" id="popupTime"></td>
-                </tr>
-                <tr>
-                <th class="left">Moves</th>
-                <th class="right">Seed</th>
-                </tr>
-                <tr>
-                <td class="left" id="popupMoves"></td>
-                <td class="right" id="popupSeed"></td>
-                </tr>
-                <tr>
-                <th class="left" colspan="2">Record</th>
-                </tr>
-                <tr>
-                <td colspan="2">
-                    <span id="popupRecord"></span>
-                    <span id="newBest" class="new-best">New best!</span>
-                </td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="popup-buttons">
-            <button onclick="hideWinPopup(); startGame();">Play again</button>
-        </div>
-
-    </div>
-    </div>
-
-    <div id="authNotification"></div>
-
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
-    
-
-    <script src="script.js" type="module"></script>
-    <script src="tutorial.js"></script>
-
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </body>
 </html>
 

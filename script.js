@@ -5,6 +5,8 @@ function updateIcon(theme) {
     themeIcon.textContent = theme === 'dark' ? '🌞' : '🌙';
 }
 
+function gebi(id) { return document.getElementById(id); }
+
 toggle.addEventListener('click', () => {
     const currentTheme = document.body.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -25,9 +27,8 @@ let bracketPos = 0;
 let bracketSize = 0;
 let mainString = "";
 let gameActive = false;
-let moveNum = 0;
 let seed = "";
-let ign = "Anonymous";
+let movesArr = [];
 
 let records = Array(29).fill(null);
 let completions = Array(29).fill(0);
@@ -39,23 +40,22 @@ const button = document.getElementById("play");
 const restart = document.getElementById("restart");
 const mainmenu = document.getElementById("menu");
 const difficulty = document.getElementById("difficulty");
-const main = document.getElementById("main");
-const label1 = document.querySelector(".label1");
-const mobileControls = document.getElementById("mobileControls");
-const sort16header = document.getElementById("mainheader");
+const sol = document.getElementById("solution");
+const reveal = document.getElementById("reveal");
 
 for(let i = 8; i <= 36; i++) {
+    const p = document.createElement('p');
+    p.id = i;
+    p.textContent = `${i}: --:--.---`;
+    recordList.appendChild(p);
+
     const option = document.createElement('option');
     option.value = i;
     option.textContent = i;
     dropdown.appendChild(option);
 }
 
-initializeRecordDisplay();
-
-function isMobile() {
-    return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
-}
+updateRecordDisplay();
 
 function keyHandler(event) {
     if (!gameActive) return;
@@ -64,21 +64,21 @@ function keyHandler(event) {
     let shifting = mainString.slice(bracketPos, bracketPos + bracketSize);
     let label2 = document.getElementById("main");
 
-    if (keyPressed === "a" && bracketPos > 0) {
+    if (keyPressed === "a" && bracketPos > 0){
         bracketPos--;
-        moveNum++;
+        movesArr.push("BracketLeft")
     }
-    else if (keyPressed === "d" && bracketPos + bracketSize < stringLen) {
+    else if (keyPressed === "d" && bracketPos + bracketSize < stringLen){ 
         bracketPos++;
-        moveNum++;
+        movesArr.push("BracketRight")
     }
     else if (keyPressed === "ArrowLeft" && shifting) {
         mainString = mainString.slice(0, bracketPos) + shiftByOne(shifting, "left") + mainString.slice(bracketPos + bracketSize);
-        moveNum++;
+        movesArr.push("CharsLeft");
     }
     else if (keyPressed === "ArrowRight" && shifting) {
         mainString = mainString.slice(0, bracketPos) + shiftByOne(shifting, "right") + mainString.slice(bracketPos + bracketSize);
-        moveNum++;
+        movesArr.push("CharsRight");
     }
     else return;
 
@@ -89,11 +89,10 @@ function keyHandler(event) {
 
 function startGame() {
     let choice = parseInt(dropdown.value);
-    
+    let label1 = document.querySelector(".label1");
     difficulty.textContent = `Difficulty: ${choice} characters`;
     label1.style.color = "";
-    moveNum = 0;
-    seed="";
+
     
     if (choice < 8 || choice > 36) {  
         label1.textContent = "Select number from 8 to 36!";
@@ -110,18 +109,17 @@ function startGame() {
     timerInterval = setInterval(() => {
         let elapsed = Date.now() - startTime;
         label1.textContent = `Time: ${(elapsed / 1000).toFixed(3)} s`;
-    }, 1);
+    }, 10);
 
     dropdown.style.display = "none";
     button.style.display = "none";
     restart.style.display = "inline";
     mainmenu.style.display = "inline";
-    if (isMobile()){
-        mobileControls.style.display = "inline";
-    }
+
     gameActive = true;
     mainString = createString(choice);
     seed = mainString;
+    movesArr = [];
     bracketSize = Math.ceil(choice / 2);
     bracketPos = 0;
     document.getElementById("main").textContent = bracket_first_x(mainString, 0, bracketSize);
@@ -132,53 +130,40 @@ function startGame() {
 function mainMenu() {
     clearInterval(timerInterval);
     document.querySelector(".label1").textContent = "Select character number (8-36): ";
-    label1.style.color = "";
     dropdown.style.display = "inline";
     button.style.display = "inline";
     restart.style.display = "none";
     mainmenu.style.display = "none";
-    mobileControls.style.display = "none";
+    reveal.style.display = "none";
     difficulty.textContent = "";
-    main.textContent = "";
+    document.getElementById("main").textContent = "";
     document.removeEventListener("keydown", keyHandler);
 }
 
 function winGame() {
     clearInterval(timerInterval);
     let elapsed = Date.now() - startTime;
+    let label1 = document.querySelector(".label1");
     label1.style.color = "green";
     bracketPos = 0;
     document.getElementById("main").textContent = "";
-    mobileControls.style.display = "none";
-    restart.style.display = "none";
-    mainmenu.style.display = "none";
     gameActive = false;
+    let recordLabel = document.getElementById(mainString.length.toString());
     let idx = mainString.length - 8;
     if (records[idx] === null || elapsed < records[idx]) {
         records[idx] = elapsed;
+        recordLabel.textContent = `${mainString.length}: ${(elapsed / 1000).toFixed(3)}s`;
     }
     label1.textContent = `You win! Time: ${(elapsed / 1000).toFixed(3)} s. Record: ${(records[idx] / 1000).toFixed(3)} s`;
     document.removeEventListener("keydown", keyHandler);
+    difficulty.textContent += "\nSeed: "+seed+"\nMoves: "+movesArr.length;
+    reveal.style.display = "inline-block";
 
     //stats update
     completions[idx]++;
     averageTimes[idx] = ((averageTimes[idx] * (completions[idx] - 1)) + elapsed) / completions[idx];
-    sendResult(ign, mainString.length, elapsed, seed, moveNum);
-    let recordTime = records[mainString.length - 8] / 1000;
-    let isNewBest = elapsed / 1000 <= recordTime;
-    
 
     updateRecordDisplay();
-    mainMenu();
-
-    showWinPopup(
-        mainString.length,
-        elapsed / 1000,
-        moveNum,
-        seed,
-        recordTime,
-        isNewBest
-    );
 }
 
 function createString(len) {
@@ -204,390 +189,83 @@ function bracket_first_x(text, start, x) {
     return first_part + (second_part ? "  " + second_part : "");
 }
 
-async function sendResult(playerName, difficulty, best_time, seed, moves) {
+function showMoves() {
+    sol.textContent = movesArr.join(",");
+    sol.style.display = "block";
+}
+
+
+const secretKey = "Sort16SecretKey123";
+
+function exportRecords() {
+
+    const data = {
+        records: records,
+        completions: completions,
+        averageTimes: averageTimes
+    };
+    const jsonStr = JSON.stringify(data);
+    const encrypted = CryptoJS.AES.encrypt(jsonStr, secretKey).toString();
+    const encoded = btoa(encrypted);
+    navigator.clipboard.writeText(encoded).then(() => {
+        alert("Game records copied to clipboard!");
+    }).catch(() => {
+        alert("Failed to copy. Here’s the string:\n" + encoded);
+    });
+}
+
+function importRecords() {
+    const input = prompt("Paste your saved records string:");
+    if (!input) return;
     try {
-        // Get the user ID
-        const { data: userData, error: userError } = await database
-            .from('users')
-            .select('id')
-            .eq('username', playerName)
-            .maybeSingle();
-
-        if (userError) {
-            console.error('Error fetching user:', userError);
-            return;
-        }
-
-        if (!userData) {
-            console.error('User not found');
-            return;
-        }
-
-        const userId = userData.id;
-
-        // Helper function to insert or update a table
-        async function upsert(table, match, insertData, updateData) {
-            const { data: existing, error: fetchError } = await database
-                .from(table)
-                .select('*')
-                .match(match)
-                .single();
-
-            if (fetchError && fetchError.code !== 'PGRST116') {
-                console.error(`Error fetching ${table}:`, fetchError);
-                return null;
-            }
-
-            if (!existing) {
-                const { data, error } = await database
-                    .from(table)
-                    .insert([insertData]);
-                if (error) console.error(`Error inserting into ${table}:`, error);
-                return data;
-            } else {
-                const { data, error } = await database
-                    .from(table)
-                    .update(updateData)
-                    .eq('id', existing.id);
-                if (error) console.error(`Error updating ${table}:`, error);
-                return data;
-            }
-        }
-
-        // Scores: only update if better
-        const existingScore = await database
-            .from('scores')
-            .select('*')
-            .match({ player: playerName, difficulty })
-            .single();
-
-        if (!existingScore.data || best_time < existingScore.data.best_time) {
-            await upsert(
-                'scores',
-                { player: playerName, difficulty },
-                { player: playerName, difficulty, best_time, moves, seed, created_at: new Date().toISOString() },
-                { best_time, moves, seed, created_at: new Date().toISOString() }
-            );
+        const encrypted = atob(input);
+        const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
+        const data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+        if (data.records && Array.isArray(data.records)) {
+            records = data.records;
+            completions = data.completions;
+            averageTimes = data.averageTimes;
+            updateRecordDisplay();
+            alert("Records imported successfully!");
         } else {
-            console.warn('Score not updated: not better than existing.');
+            alert("Invalid data!");
         }
-
-        // Completions: include both FK and username
-        const currentCompletions = completions[difficulty - 8];
-        await upsert(
-            'completions',
-            { user_id: userId, difficulty },
-            { user_id: userId, username: playerName, difficulty, completions: currentCompletions },
-            { username: playerName, completions: currentCompletions }
-        );
-
-        console.log('Result processed successfully.');
-    } catch (err) {
-        console.error(err);
+    } catch (e) {
+        alert("Failed to import records. The string may be invalid.");
     }
 }
 
+const tooltip = document.getElementById('tooltip');
 
-
-
-const tutorialBtn = document.getElementById("tutorialBtn");
-const tutorialModal = document.getElementById("tutorialModal");
-const closeTutorial = document.getElementById("closeTutorial");
-
-tutorialBtn.addEventListener("click", () => {
-    tutorialModal.style.display = "block";
-    tutorialModal.className = "modal active";
-});
-
-closeTutorial.addEventListener("click", () => {
-    tutorialModal.style.display = "none";
-    tutorialModal.className = "modal inactive";
-});
-
-// Close if user clicks outside modal
-window.addEventListener("click", (e) => {
-    if (e.target === tutorialModal) {
-        tutorialModal.style.display = "none";
-    }
-});
-
-
-function initializeRecordDisplay() {
-
-    for (let i = 8; i <= 36; i++) {
-        let recordLabel = document.getElementById(i.toString());
-
-        // If it doesn't exist, create it and append to container
-        if (!recordLabel) {
-            recordLabel = document.createElement('div');
-            recordLabel.id = i.toString();
-            document.getElementById('record-list').appendChild(recordLabel);
-        }
-
-        recordLabel.classList.add('record-label');
-
-        // Trophy button: only create if not already present
-        if (!recordLabel.querySelector('.trophy-btn')) {
-            const trophyBtn = document.createElement('button');
-            trophyBtn.textContent = "🏆";
-            trophyBtn.classList.add('trophy-btn');
-            trophyBtn.onclick = () => {
-                const url = `leaderboards/difficultyLeaderboard.html?difficulty=${i}`;
-                window.open(url, "_blank");
-            };
-            recordLabel.appendChild(trophyBtn);
-            // Create leaderboard button
-            const leaderboardBtn = document.createElement('button');
-            leaderboardBtn.textContent = "📊";
-            leaderboardBtn.classList.add('leaderboard-btn'); // optional class for styling
-            leaderboardBtn.style.cursor = "pointer";
-            leaderboardBtn.style.border = "none";
-            leaderboardBtn.style.background = "transparent";
-            leaderboardBtn.style.fontSize = "1em";
-
-            leaderboardBtn.onclick = () => {
-                const url = `leaderboards/completionsLeaderboard.html?completions=${i}`;
-                window.open(url, "_blank");
-            };
-
-            // Append it to the label, next to the trophy button
-            recordLabel.appendChild(leaderboardBtn);
-
-        }
-
-        // Text span: only create if not already present
-        if (!recordLabel.querySelector('.record-text')) {
-            const textSpan = document.createElement('span');
-            textSpan.classList.add('record-text');
-            textSpan.textContent = `${i}: --:--.---`;
-            recordLabel.appendChild(textSpan);
-        }
-    }
-}
-
-
-
-// Update only the text content without adding new elements
 function updateRecordDisplay() {
     for (let i = 8; i <= 36; i++) {
         const recordLabel = document.getElementById(i.toString());
-        if (!recordLabel) continue; // skip missing elements
-
-        let textSpan = recordLabel.querySelector('.record-text');
-        let trophyBtn = recordLabel.querySelector('.trophy-btn');
-
-        // Create trophy button if missing
-        if (!trophyBtn) {
-            trophyBtn = document.createElement('button');
-            trophyBtn.textContent = "🏆";
-            trophyBtn.classList.add('trophy-btn');
-            trophyBtn.onclick = () => {
-                const url = `leaderboards/leaderboard.html?difficulty=${i}`;
-                window.open(url, "_blank");
-            };
-            recordLabel.insertBefore(trophyBtn, textSpan);
-        }
-
-        // Create text span if missing
-        if (!textSpan) {
-            textSpan = document.createElement('span');
-            textSpan.classList.add('record-text');
-            recordLabel.appendChild(textSpan);
-        }
-
-        // Update the text
         const rec = records[i - 8];
-        textSpan.textContent = `${i}: ${rec ? (rec / 1000).toFixed(3) + 's' : '--:--.---'}`;
-    }
-}
+        const avg = averageTimes[i - 8];
+        const comp = completions[i - 8];
 
+        recordLabel.textContent = `${i}: ${rec ? (rec / 1000).toFixed(3) + 's' : '--:--.---'}`;
 
+        recordLabel.onmouseenter = null;
+        recordLabel.onmousemove = null;
+        recordLabel.onmouseleave = null;
 
-
-
-function showWinPopup(difficulty, time, moves, seed, record, isNewBest) {
-    document.getElementById('popupDifficulty').textContent = difficulty;
-    document.getElementById('popupTime').textContent = time.toFixed(3);
-    document.getElementById('popupMoves').textContent = moves;
-    document.getElementById('popupSeed').textContent = seed;
-    document.getElementById('popupRecord').textContent = record.toFixed(3) + "s";
-    document.getElementById('newBest').style.display = isNewBest ? 'inline-block' : 'none';
-    mobileControls.style.display = "none";
-    
-    popup.classList.remove('hidden');
-}
-
-const popup = document.getElementById('winPopup');
-const closePopup = document.getElementById("closePopup");
-
-function hideWinPopup() {
-    popup.classList.add('hidden');
-}
-
-closePopup.addEventListener("click", () => {
-    popup.style.display = "none";
-});
-
-function openModal(id) {
-  document.getElementById(id).classList.remove('hidden');
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.add('hidden');
-}
-
-window.openAuthModal = function(id) {
-  const el = document.getElementById(id);
-  if (el) el.classList.add("active");
-  sort16header.style.marginTop = "2.5vw";
-  label1.style.marginTop = "4vw";
-};
-
-window.closeAuthModal = function(id) {
-  const el = document.getElementById(id);
-  if (el) el.classList.remove("active");
-  sort16header.style.marginTop = "0vw";
-  label1.style.marginTop = "0vw";
-};
-
-  // switch between login/signup
-window.switchToSignup = function() {
-    closeAuthModal("loginModal");
-    openAuthModal("signupModal");
-};
-
-window.switchToLogin = function() {
-    closeAuthModal("signupModal");
-    openAuthModal("loginModal");
-};
-
-  // auto-open login modal if no user in localStorage
-window.addEventListener("DOMContentLoaded", () => {
-    const loggedInUser = localStorage.getItem("loggedInUser");
-    if (!loggedInUser) {
-      openAuthModal("loginModal");
-    }
-    else {
-        ign = loggedInUser;
-        syncData(ign);   
-    }
-});
-
-// Signup
-window.signup = async function() {
-    const username = document.getElementById("signupUsername").value;
-    const password = document.getElementById("signupPassword").value;
-
-    if (!username || !password) return showAuthNotification("Enter username and password", "red");
-
-    const { data: existing, error: fetchError } = await database
-        .from('users')
-        .select('*')
-        .eq('username', username);
-
-    if (fetchError) return showAuthNotification(fetchError.message, "red");
-    if (existing.length > 0) return showAuthNotification("Username already exists", "red");
-
-    const { data, error } = await database
-        .from('users')
-        .insert([{ username, password, created_at: new Date().toISOString() }]);
-
-    if (error) return showAuthNotification(error.message, "red");
-
-    showAuthNotification("Account created successfully!", "green");
-    closeAuthModal('signupModal');
-    openAuthModal('loginModal');
-};
-
-const logged = document.getElementById("loggedin");
-const logoutBtn = document.getElementById("logout");
-
-async function syncData(username){
-    const { data: scoresData, error: scoresError } = await database
-        .from('scores')
-        .select('*')
-        .eq('player', username);
-
-    if (scoresError) {
-        console.error('Error fetching scores:', scoresError);
-    } else {
-        console.log('User scores:', scoresData);
-        scoresData.forEach(element => {
-            const idx = element.difficulty - 8;
-            records[idx] = element.best_time; // update the records array
+        recordLabel.addEventListener('mouseenter', (e) => {
+            tooltip.style.display = 'block';
+            tooltip.textContent = rec !== null
+                ? `Completions: ${comp} | Average: ${(avg / 1000).toFixed(3)}s`
+                : "No completions yet";
         });
-        updateRecordDisplay(); // refresh the UI
+
+        recordLabel.addEventListener('mousemove', (e) => {
+            tooltip.style.left = (e.pageX + 10) + 'px';
+            tooltip.style.top = (e.pageY + 10) + 'px';
+        });
+
+        recordLabel.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
     }
 }
 
-// Login
-window.login = async function() {
-    const username = document.getElementById("loginUsername").value;
-    const password = document.getElementById("loginPassword").value;
 
-    if (!username || !password) return showAuthNotification("Enter username and password", "red");
-
-    const { data, error } = await database
-        .from('users')
-        .select('*')
-        .eq('username', username);
-
-    if (error) return showAuthNotification(error.message, "red");
-    if (!data || data.length === 0) return showAuthNotification("User not found", "red");
-
-    const user = data[0];
-
-    if (user.password !== password) return showAuthNotification("Incorrect password", "red");
-    
-    localStorage.setItem("loggedInUser", username);
-    showAuthNotification("Logged in successfully!", "green");
-    logged.style.display = "flex";
-    logoutBtn.style.display = "flex";
-    logged.textContent += username;
-
-    syncData(username);
-
-    closeAuthModal('loginModal');
-};
-
-function logOut() {
-    localStorage.removeItem("loggedInUser", ign);
-    showAuthNotification("Logged out!", "green");
-    logged.style.display = "none";
-    sort16header.style.marginTop = "2.5vw";
-    label1.style.marginTop = "4vw";
-    logged.textContent = logged.textContent.slice(0,14);
-    logoutBtn.style.display = "none";
-    records = Array(29).fill(null);
-    updateRecordDisplay();
-    openAuthModal('loginModal');
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-  const loggedInUser = localStorage.getItem("loggedInUser");
-  if (!loggedInUser) {
-    openAuthModal("loginModal");
-  }
-  else {
-    logged.style.display = "flex";
-    logoutBtn.style.display = "flex";
-    logged.textContent += loggedInUser;
-  }
-});
-
-function showAuthNotification(message, type = "success") {
-  const notif = document.getElementById("authNotification");
-  notif.textContent = message;
-  notif.className = ""; // reset classes
-  notif.classList.add(type);
-  
-  notif.style.backgroundColor = type;
-  notif.style.opacity = "1";
-  notif.style.transform = "translateX(-50%) translateY(0)";
-  
-  // Hide after 3s
-  setTimeout(() => {
-    notif.style.opacity = "0";
-    notif.style.transform = "translateX(-50%) translateY(-20px)";
-  }, 3000);
-}
