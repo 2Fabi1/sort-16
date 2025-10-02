@@ -1,43 +1,65 @@
-Sort-16 is a browser-based puzzle game where players rearrange a shuffled string of characters using bracket-based shifting mechanics. The goal is to restore the original sequence using the fewest moves possible.
+# 🧩 Sort-16
 
-🎮 How It Works
+**Sort-16** is a fast-paced browser puzzle game where players rearrange a shuffled string of characters using bracket-based shifting mechanics. The goal? Restore the original sequence with precision and speed.
 
-Choose a difficulty level (8–36 characters).
+---
 
-A random string is generated from the template 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.
+## 🎮 Gameplay Overview
 
-Use keyboard controls to manipulate a bracketed segment:
+- **Choose difficulty**: Select a character count between `8–36`.
+- **Shuffle**: A randomized string is generated from the template `0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ`.
+- **Control the bracket**:
+  - `a` / `d` → Move bracket left/right  
+  - `←` / `→` → Rotate characters inside the bracket  
+  - `r` → Restart the game
 
-a / d: Move bracket left/right
+---
 
-← / →: Rotate characters inside the bracket
+## 🧠 Features
 
-r: Restart the game
+- ⏱ Real-time timer and record tracking  
+- 🌗 Dark mode toggle (`🌙` / `🌞`)  
+- 🧩 Reveal solution after completion  
+- 🔐 Export/import encrypted performance stats  
+- 📊 Tooltip stats on hover (average time, completions)
 
-🧠 Features
+---
 
-Real-time timer and record tracking
+## 📈 Stats Tracked
 
-Dark mode toggle 🌙 / 🌞
+| Metric              | Description                                 |
+|---------------------|---------------------------------------------|
+| **Fastest Time**     | Best completion time per difficulty        |
+| **Completions**      | Number of successful solves per difficulty |
+| **Average Time**     | Mean time across all completions           |
 
-Reveal solution after completion
+---
 
-Export/import encrypted performance stats
+## 🚀 Getting Started
 
-Tooltip stats on hover (average time, completions)
+1. Clone or download the repository.
+2. Open `index.html` in your browser.
+3. Select difficulty and start solving!
 
-📊 Stats Tracked
+_No installation required._
 
-Fastest completion time per difficulty
+---
 
-Number of completions
+## 🔐 Record Export/Import
 
-Average completion time
+- Records are encrypted using AES and encoded for clipboard sharing.
+- You can import saved records via prompt input.
 
-🚀 Getting Started
+---
 
-Just open index.html in your browser and start playing. No installation required.
+## 🛠 Tech Stack
 
-🔐 Record Export/Import
+- **HTML/CSS/JavaScript**
+- No external dependencies (except optional CryptoJS for encryption)
 
-Records are encrypted using AES and can be copied to clipboard or restored via prompt.
+---
+
+## 📬 Feedback & Contributions
+
+Feel free to submit issues, suggestions, or pull requests.  
+Let’s make Sort-16 even sharper.
