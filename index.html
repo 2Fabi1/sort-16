@@ -24,9 +24,11 @@
         <select id="choice"></select>
         <button onclick="startGame()" id="play">Play</button>
         <p id="main"></p>
-        <button onclick="startGame()" id="restart" style="display:none">Restart</button>
-        <button onclick="mainMenu()" id="menu" style="display:none">Main menu</button>
-        <button onclick="showMoves()" id="reveal" style="display:none">Reveal solution</button>
+        <div id="button-container" style="display: flex; gap: 10px;">
+            <button onclick="startGame()" id="restart" style="display:none">Restart</button>
+            <button onclick="mainMenu()" id="menu" style="display:none">Main menu</button>
+            <button onclick="showMoves()" id="reveal" style="display:none">Reveal solution</button>
+        </div>
         <span id="solution"></span>
         <div class="mobileControls">
             <h2>Mobile Controls:</h2>

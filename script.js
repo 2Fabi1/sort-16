@@ -42,6 +42,7 @@ const mainmenu = document.getElementById("menu");
 const difficulty = document.getElementById("difficulty");
 const sol = document.getElementById("solution");
 const reveal = document.getElementById("reveal");
+const label1 = document.querySelector(".label1");
 
 for(let i = 8; i <= 36; i++) {
     const p = document.createElement('p');
@@ -80,6 +81,10 @@ function keyHandler(event) {
         mainString = mainString.slice(0, bracketPos) + shiftByOne(shifting, "right") + mainString.slice(bracketPos + bracketSize);
         movesArr.push("CharsRight");
     }
+    else if (keyPressed === "r"){
+        startGame();
+        bracketPos = 0;
+    }
     else return;
 
     label2.textContent = bracket_first_x(mainString, bracketPos, bracketPos + bracketSize);
@@ -89,7 +94,7 @@ function keyHandler(event) {
 
 function startGame() {
     let choice = parseInt(dropdown.value);
-    let label1 = document.querySelector(".label1");
+    
     difficulty.textContent = `Difficulty: ${choice} characters`;
     label1.style.color = "";
 
@@ -115,6 +120,9 @@ function startGame() {
     button.style.display = "none";
     restart.style.display = "inline";
     mainmenu.style.display = "inline";
+    restart.textContent = "Restart";
+    sol.style.display = "none";
+    sol.textContent = "";
 
     gameActive = true;
     mainString = createString(choice);
@@ -124,26 +132,36 @@ function startGame() {
     bracketPos = 0;
     document.getElementById("main").textContent = bracket_first_x(mainString, 0, bracketSize);
 
+    document.addEventListener("keydown", restartKey);
     document.addEventListener("keydown", keyHandler);
 }
 
 function mainMenu() {
     clearInterval(timerInterval);
     document.querySelector(".label1").textContent = "Select character number (8-36): ";
+    label1.style.color = "";
     dropdown.style.display = "inline";
     button.style.display = "inline";
     restart.style.display = "none";
     mainmenu.style.display = "none";
     reveal.style.display = "none";
+    sol.style.display = "none";
+    sol.textContent = "";
     difficulty.textContent = "";
     document.getElementById("main").textContent = "";
     document.removeEventListener("keydown", keyHandler);
 }
 
+function restartKey(event){
+    let keyPressed = event.key;
+    if (keyPressed === "r"){
+        startGame();
+    }
+}
+
 function winGame() {
     clearInterval(timerInterval);
     let elapsed = Date.now() - startTime;
-    let label1 = document.querySelector(".label1");
     label1.style.color = "green";
     bracketPos = 0;
     document.getElementById("main").textContent = "";
@@ -156,8 +174,10 @@ function winGame() {
     }
     label1.textContent = `You win! Time: ${(elapsed / 1000).toFixed(3)} s. Record: ${(records[idx] / 1000).toFixed(3)} s`;
     document.removeEventListener("keydown", keyHandler);
+    document.addEventListener("keydown", restartKey);
     difficulty.textContent += "\nSeed: "+seed+"\nMoves: "+movesArr.length;
     reveal.style.display = "inline-block";
+    restart.textContent = "Play again";
 
     //stats update
     completions[idx]++;
