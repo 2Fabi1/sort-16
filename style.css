@@ -173,7 +173,7 @@ button:active {
 .mobileControls {
     margin-top: 150px;
     width: 100%;
-    display: flex;
+    display: none;
     flex-direction: column; 
     text-align: center;
     gap: 10px;
@@ -206,10 +206,223 @@ button:active {
     max-width: 100%;           /* prevents horizontal overflow */
 }
 
+.modal {
+    display: none; /* hidden by default */
+    position: fixed;
+    z-index: 200; /* above everything */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; 
+    background: rgba(0, 0, 0, 0.6); /* dim background */
+}
+
+.modal-content {
+    background: var(--panel-bg);
+    color: var(--text-color);
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 12px;
+    display: block;
+    width: 80%;
+    max-width: 500px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: var(--primary-color);
+}
+
+
+.modal-content .action {
+    text-align: right;
+    padding-left: 20px;
+}
+
+.close {
+    float: right;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: var(--text-color);
+}
+
+.close:hover {
+    color: var(--primary-color);
+}
+
+.tutorial-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0;
+}
+
+#tutorialBtn {
+    display: inline-block;
+}
+
+.key {
+    background-color: #666a72;
+    border: 3px solid #1f2937;
+    border-radius: 4px;
+    padding: 4px 8px;
+    min-width: 24px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.text {
+    flex: 1; 
+}
+
+#tutorial_string {
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.5em;
+    margin:0px;
+    white-space: pre-wrap;
+}
+
+#goal {
+    margin-top:30px;
+    margin-bottom:10px;
+}
+
+#scrambled {
+    margin: 0px;
+}
+
+#try {
+    margin: 0px;
+}
+
+#tutorial_string {
+    margin-top: 10px;
+}
+
 
 #label1 {
     color: var(--text-color);
 }
+
+.popup {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+  
+.popup.hidden {
+    display: none;
+}
+  
+.popup-content {
+    background: var(--bg-color);
+    border-radius: 15px;
+    padding: 30px 40px;
+    text-align: center;
+    width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    color: var(--text-color);
+    animation: popupFade 0.7s ease-out;
+    position: relative;
+}
+  
+.popup-content h1 {
+    color: #2ecc71;
+    margin-bottom: 20px;
+}
+
+.popup-stats {
+    width: 100%;
+    border-collapse: collapse; /* remove gaps between cells */
+    margin: 10px auto 0;
+    font-size: 16px;
+    text-align: left;
+}
+  
+.popup-stats th,
+.popup-stats td {
+    padding: 8px 12px; /* spacing between cells */
+}
+  
+.popup-stats th.left,
+.popup-stats td.left {
+    text-align: left;
+}
+  
+.popup-stats th.right,
+.popup-stats td.right {
+    text-align: right;
+}
+  
+.popup-stats th {
+    padding-bottom: 3px;
+}
+  
+.popup-stats td {
+    padding-top: 3px;
+}
+  
+.popup-stats div {  
+    display: contents;
+}                       
+  
+     
+.popup-stats tbody {
+    width: 80%;
+}
+  
+.popup-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-around;
+}
+  
+.popup-buttons button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: #3498db;
+    color: white;
+    transition: 0.2s;
+}
+  
+.popup-buttons button:hover {
+    background: #2980b9;
+}
+  
+.new-best {
+    background: orange;
+    color: black;
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 12px;
+    margin-left: 6px;
+ }
+  
+
+@keyframes popupFade {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: scale(0.9);}
+    to {opacity: 1; transform: scale(1);}
+}
+
 @media (max-width: 1200px) {
     body {
         flex-direction: column; /* stack vertically */

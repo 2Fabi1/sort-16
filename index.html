@@ -23,6 +23,7 @@
         <h3 class="label1">Select character number (8-36): </h3>
         <select id="choice"></select>
         <button onclick="startGame()" id="play">Play</button>
+        <button onclick="tutorial_func()" id="tutorialBtn">Tutorial</button>
         <p id="main"></p>
         <div id="button-container" style="display: flex; gap: 10px;">
             <button onclick="startGame()" id="restart" style="display:none">Restart</button>
@@ -41,6 +42,80 @@
                 <button onclick="keyHandler({key: 'ArrowRight'})">Shift right</button>
             </div>
         </div>
+        <div id="tutorialModal" class="modal inactive">
+            <div class="modal-content">
+                <span id="closeTutorial" class="close">&times;</span>
+                <h2>How to Play</h2>
+                <p>Welcome to <strong>Sort16</strong>!</p>
+                <div class="tutorial-row">
+                    <span class="key">A</span>
+                    <span class="text">Moves the bracket to the left</span>
+                </div>
+        
+                <div class="tutorial-row">
+                    <span class="key">D</span>
+                    <span class="text">Moves the bracket to the right</span>
+                </div>
+        
+                <div class="tutorial-row">
+                    <span class="key">←</span>
+                    <span class="text">Shift characters inside the bracket left</span>
+                </div>
+        
+                <div class="tutorial-row">
+                    <span class="key">→</span>
+                    <span class="text">Shift characters inside the bracket right</span>
+                </div>
+        
+                <h2 id="goal">Goal</h2>
+                <p id="scrambled">Sort the scrambled into the original form - 0-9,A-Z!</p>
+                <p id="try">Here, try it out:</p>
+                <p id="tutorial_string"></p>
+        
+            </div>
+        </div>
+
+        <div id="winPopup" class="popup hidden">
+            <div class="popup-content">
+                <span id="closePopup" class="close">&times;</span>
+                <h1>YOU WIN!</h1>
+                <table class="popup-stats">
+                    <tbody>
+                        <tr>
+                        <th class="left">Difficulty</th>
+                        <th class="right">Time</th>
+                        </tr>
+                        <tr>
+                        <td id="popupDifficulty" class="left"></td>
+                        <td class="right" id="popupTime"></td>
+                        </tr>
+                        <tr>
+                        <th class="left">Moves</th>
+                        <th class="right">Seed</th>
+                        </tr>
+                        <tr>
+                        <td class="left" id="popupMoves"></td>
+                        <td class="right" id="popupSeed"></td>
+                        </tr>
+                        <tr>
+                        <th class="left" colspan="2">Record</th>
+                        </tr>
+                        <tr>
+                        <td colspan="2">
+                            <span id="popupRecord"></span>
+                            <span id="newBest" class="new-best">New best!</span>
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+        
+                <div class="popup-buttons">
+                    <button onclick="hideWinPopup(); startGame();">Play again</button>
+                </div>
+        
+            </div>
+            </div>        
+
         <div id="tooltip" style="position:absolute; display:none; background:var(--panel-bg); color:var(--text-color); padding:6px 10px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.2); pointer-events:none; z-index:100;"></div>
         <div style="margin-top: 20px;">
             <button onclick="exportRecords()">Export Records</button>
@@ -48,7 +123,9 @@
         </div>
     </div>
 
+    <script src="helper.js"></script>
     <script src="script.js"></script>
+    <script src="tutorial.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </body>
 </html>

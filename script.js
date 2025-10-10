@@ -24,6 +24,7 @@ let startTime;
 
 const template = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 let bracketPos = 0;
+let moveNum = 0;
 let bracketSize = 0;
 let mainString = "";
 let gameActive = false;
@@ -41,8 +42,15 @@ const restart = document.getElementById("restart");
 const mainmenu = document.getElementById("menu");
 const difficulty = document.getElementById("difficulty");
 const sol = document.getElementById("solution");
+const mobileControls = document.getElementById("mobileControls");
 const reveal = document.getElementById("reveal");
 const label1 = document.querySelector(".label1");
+const tutorial = document.getElementById("tutorialBtn.");
+const tutorialModal = document.getElementById("tutorialModal");
+const closeTutorial = document.getElementById("closeTutorial");
+const sort16header = document.getElementById("mainheader");
+const seedparagraph = document.getElementById("popupSeed");
+
 
 for(let i = 8; i <= 36; i++) {
     const p = document.createElement('p');
@@ -57,6 +65,10 @@ for(let i = 8; i <= 36; i++) {
 }
 
 updateRecordDisplay();
+
+function isMobile() {
+    return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+}
 
 function keyHandler(event) {
     if (!gameActive) return;
@@ -121,8 +133,14 @@ function startGame() {
     restart.style.display = "inline";
     mainmenu.style.display = "inline";
     restart.textContent = "Restart";
+    tutorialBtn.style.display = "none";
+    reveal.style.display = "none";
     sol.style.display = "none";
     sol.textContent = "";
+
+    if (isMobile()){
+        mobileControls.style.display = "inline";
+    }
 
     gameActive = true;
     mainString = createString(choice);
@@ -145,6 +163,7 @@ function mainMenu() {
     restart.style.display = "none";
     mainmenu.style.display = "none";
     reveal.style.display = "none";
+    tutorialBtn.style.display = "inline";
     sol.style.display = "none";
     sol.textContent = "";
     difficulty.textContent = "";
@@ -179,81 +198,43 @@ function winGame() {
     reveal.style.display = "inline-block";
     restart.textContent = "Play again";
 
-    //stats update
     completions[idx]++;
     averageTimes[idx] = ((averageTimes[idx] * (completions[idx] - 1)) + elapsed) / completions[idx];
+
+    let recordTime = records[mainString.length - 8] / 1000;
+    let isNewBest = elapsed / 1000 <= recordTime;
+    
+    showWinPopup(
+        mainString.length,
+        elapsed / 1000,
+        movesArr.length,
+        seed,
+        recordTime,
+        isNewBest
+    );
 
     updateRecordDisplay();
 }
 
-function createString(len) {
-    let arr = template.slice(0, len).split("");
-    for (let i = arr.length - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
+tutorialBtn.addEventListener("click", () => {
+    tutorialModal.style.display = "block";
+    tutorialModal.className = "modal active";
+});
+
+closeTutorial.addEventListener("click", () => {
+    tutorialModal.style.display = "none";
+    tutorialModal.className = "modal inactive";
+});
+
+window.addEventListener("click", (e) => {
+    if (e.target === tutorialModal) {
+        tutorialModal.style.display = "none";
     }
-    return arr.join("");
-}
+});
 
-function shiftByOne(text, direction) {
-    if (!text) return text;
-    return direction === "left" ? text.slice(1) + text[0] : text.slice(-1) + text.slice(0, -1);
-}
-
-function bracket_first_x(text, start, x) {
-    let chars = text.split("");
-    let spaced_list = chars.join("  ").split("  ");
-    x = Math.min(x, text.length);
-    let first_part = spaced_list.slice(0, start).join("  ") + " [ " + spaced_list.slice(start, x).join("  ") + " ]";
-    let second_part = spaced_list.slice(x).join("  ");
-    return first_part + (second_part ? "  " + second_part : "");
-}
-
-function showMoves() {
-    sol.textContent = movesArr.join(",");
-    sol.style.display = "block";
-}
-
-
-const secretKey = "Sort16SecretKey123";
-
-function exportRecords() {
-
-    const data = {
-        records: records,
-        completions: completions,
-        averageTimes: averageTimes
-    };
-    const jsonStr = JSON.stringify(data);
-    const encrypted = CryptoJS.AES.encrypt(jsonStr, secretKey).toString();
-    const encoded = btoa(encrypted);
-    navigator.clipboard.writeText(encoded).then(() => {
-        alert("Game records copied to clipboard!");
-    }).catch(() => {
-        alert("Failed to copy. Here’s the string:\n" + encoded);
-    });
-}
-
-function importRecords() {
-    const input = prompt("Paste your saved records string:");
-    if (!input) return;
-    try {
-        const encrypted = atob(input);
-        const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-        const data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-        if (data.records && Array.isArray(data.records)) {
-            records = data.records;
-            completions = data.completions;
-            averageTimes = data.averageTimes;
-            updateRecordDisplay();
-            alert("Records imported successfully!");
-        } else {
-            alert("Invalid data!");
-        }
-    } catch (e) {
-        alert("Failed to import records. The string may be invalid.");
-    }
-}
+closePopup.addEventListener("click", () => {
+    popup.style.display = "none";
+});
 
 const tooltip = document.getElementById('tooltip');
 
@@ -287,5 +268,4 @@ function updateRecordDisplay() {
         });
     }
 }
-
 
