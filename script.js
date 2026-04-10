@@ -323,6 +323,7 @@ async function winGame() {
         moves: movesArr.length,
         difficulty: mainString.length,
         seed: seed,
+        moveList: movesArr,
     });
     updateRecordDisplay();
 }

@@ -103,7 +103,7 @@ async function apiTest() {
 // =========================
 // RECORDS
 // =========================
-async function pushRecord(time, moves, difficulty, seed) {
+async function pushRecord(time, moves, difficulty, seed, movesArr) {
   const safeTime = Number(time);
   const safeMoves = Number(moves);
   const safeDifficulty = Number(difficulty);
@@ -113,15 +113,17 @@ async function pushRecord(time, moves, difficulty, seed) {
     return null;
   }
 
-  return request("/api/records/add", {
-    method: "POST",
-    body: JSON.stringify({
-      time: safeTime,
-      moves: safeMoves,
-      difficulty: safeDifficulty,
-      seed,
-    }),
-  });
+  if (simulateGameFromSeed(seed, movesArr, time)) {
+      return request("/api/records/add", {
+      method: "POST",
+      body: JSON.stringify({
+        time: safeTime,
+        moves: safeMoves,
+        difficulty: safeDifficulty,
+        seed,
+      }),
+    });
+  }
 }
 
 async function loadRecordsByUsername() {
@@ -156,20 +158,23 @@ async function getUsername(){
 // =========================
 // COMPLETIONS
 // =========================
-async function addCompletion(difficulty) {
-  try {
-    return await request(
-      `/api/completions/add?difficulty=${difficulty}`,
-      { method: "POST" }
-    );
-  } catch (err) {
-    if (err.status === 401) {
-      showAuthNotification("Log in first.", "red");
-    } else {
-      console.error("Failed to add completion");
+async function addCompletion(difficulty, seed, movesArr, time) {
+  if (simulateGameFromSeed(seed, movesArr, time)) {
+    try {
+      return await request(
+        `/api/completions/add?difficulty=${difficulty}`,
+        { method: "POST" }
+      );
+    } catch (err) {
+      if (err.status === 401) {
+        showAuthNotification("Log in first.", "red");
+      } else {
+        console.error("Failed to add completion");
+      }
+      return null;
     }
-    return null;
   }
+  return null;
 }
 
 async function loadCompletionLeaderboard(difficulty) {
@@ -187,10 +192,10 @@ async function loadCompletionLeaderboard(difficulty) {
 // =========================
 
 // Call this after finishing a level (BEST PRACTICE)
-async function syncRunResult({ time, moves, difficulty, seed }) {
+async function syncRunResult({ time, moves, difficulty, seed, movesArr }) {
   const [record] = await Promise.all([
-    pushRecord(time, moves, difficulty, seed),
-    addCompletion(difficulty),
+    pushRecord(time, moves, difficulty, seed, movesArr),
+    addCompletion(difficulty, seed, movesArr, time),
   ]);
 
   return record;
@@ -208,6 +213,44 @@ async function syncUserData() {
   } catch {
     return null;
   }
+}
+
+function simulateGameFromSeed(seed, moves, time) {
+    const template = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    let mainString = seed;
+    let bracketPos = 0;
+    let bracketSize = Math.ceil(seed.length / 2);
+    let movesArr = [];
+    if (time / moves.length < 67) return false; // Too fast, likely invalid
+    for (let i = 0; i < moves.length; i++) {
+        let move = moves[i];
+        let stringLen = mainString.length;
+        let shifting = mainString.slice(bracketPos, bracketPos + bracketSize);
+        if (move === "BracketLeft" && bracketPos > 0) {
+            bracketPos--;
+            movesArr.push(move);
+        }
+        else if (move === "BracketRight" && bracketPos + bracketSize < stringLen) {
+            bracketPos++;
+            movesArr.push(move);
+        }
+        else if (move === "CharsLeft" && shifting) {
+            mainString =
+                mainString.slice(0, bracketPos) +
+                shiftByOne(shifting, "left") +
+                mainString.slice(bracketPos + bracketSize);
+            movesArr.push(move);
+        }
+        else if (move === "CharsRight" && shifting) {
+            mainString =
+                mainString.slice(0, bracketPos) +
+                shiftByOne(shifting, "right") +
+                mainString.slice(bracketPos + bracketSize);
+            movesArr.push(move);
+        }
+    }
+    return mainString === template.slice(0, stringLen);
 }
 
 // =========================
