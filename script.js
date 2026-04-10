@@ -5,8 +5,6 @@ function updateIcon(theme) {
     themeIcon.textContent = theme === 'dark' ? '🌞' : '🌙';
 }
 
-function gebi(id) { return document.getElementById(id); }
-
 toggle.addEventListener('click', () => {
     const currentTheme = document.body.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -30,9 +28,10 @@ let mainString = "";
 let gameActive = false;
 let seed = "";
 let movesArr = [];
+let completionsShow = false;
 
 let records = Array(29).fill(null);
-let completions = Array(29).fill(0);
+let completionCounts = {};
 let averageTimes = Array(29).fill(0);
 
 const recordList = document.getElementById('record-list');
@@ -52,19 +51,111 @@ const sort16header = document.getElementById("mainheader");
 const seedparagraph = document.getElementById("popupSeed");
 
 
-for(let i = 8; i <= 36; i++) {
-    const p = document.createElement('p');
-    p.id = i;
-    p.textContent = `${i}: --:--.---`;
-    recordList.appendChild(p);
+function initializeRecordDisplay() {
+    for (let i = 8; i <= 36; i++) {
+        let recordLabel = document.getElementById(i.toString());
 
+        if (!recordLabel) {
+            recordLabel = document.createElement('div');
+            recordLabel.id = i.toString();
+            document.getElementById('record-list').appendChild(recordLabel);
+        }
+
+        recordLabel.classList.add('record-label');
+
+        if (!recordLabel.querySelector('.trophy-btn')) {
+            const trophyBtn = document.createElement('button');
+            trophyBtn.textContent = "🏆";
+            trophyBtn.classList.add('trophy-btn');
+
+            trophyBtn.onclick = () => {
+                const url = `leaderboards/difficultyLeaderboard.html?difficulty=${i}`;
+                window.open(url, "_blank");
+            };
+
+            recordLabel.appendChild(trophyBtn);
+        }
+
+        if (!recordLabel.querySelector('.leaderboard-btn')) {
+            const leaderboardBtn = document.createElement('button');
+            leaderboardBtn.textContent = "📊";
+            leaderboardBtn.classList.add('leaderboard-btn');
+
+            leaderboardBtn.style.cursor = "pointer";
+            leaderboardBtn.style.border = "none";
+            leaderboardBtn.style.background = "transparent";
+            leaderboardBtn.style.fontSize = "1em";
+
+            leaderboardBtn.onclick = () => {
+                const url = `leaderboards/completionsLeaderboard.html?difficulty=${i}`;
+                window.open(url, "_blank");
+            };
+
+            recordLabel.appendChild(leaderboardBtn);
+        }
+
+        // text
+        if (!recordLabel.querySelector('.record-text')) {
+            const textSpan = document.createElement('span');
+            textSpan.classList.add('record-text');
+            textSpan.textContent = `${i}: --:--.---`;
+            recordLabel.appendChild(textSpan);
+        }
+    }
+}
+
+function swap() {
+    completionsShow = !completionsShow;
+    if (completionsShow) {
+        document.querySelector('.records-header h2').textContent = "Completions:";
+        document.getElementById("swapRecordTypeBtn").textContent = "Records";
+    } else {
+        document.querySelector('.records-header h2').textContent = "Records (s):";
+        document.getElementById("swapRecordTypeBtn").textContent = "Completions";
+    }
+    updateRecordDisplay();
+}
+
+function updateRecordDisplay() {
+    for (let i = 8; i <= 36; i++) {
+        const recordLabel = document.getElementById(i.toString());
+        if (!recordLabel) continue;
+
+        let textSpan = recordLabel.querySelector('.record-text');
+
+        if (!textSpan) {
+            textSpan = document.createElement('span');
+            textSpan.classList.add('record-text');
+            recordLabel.appendChild(textSpan);
+        }
+
+        if(!completionsShow) {
+            const recObj = records.find(r => r.difficulty === i);
+            const rec = recObj?.time;
+            textSpan.textContent = `${i}: ${rec ? (rec / 1000).toFixed(3) + 's' : '--:--.---'}`;
+        } else {
+            const comp = completionCounts[i] ?? 0;
+            textSpan.textContent = `${i}: ${comp}`;
+        }
+    }
+}
+
+function attachGameListeners() {
+    document.removeEventListener("keydown", keyHandler);
+    document.removeEventListener("keydown", restartKey);
+
+    document.addEventListener("keydown", keyHandler);
+    document.addEventListener("keydown", restartKey);
+}
+
+for(let i = 8; i <= 36; i++) {
     const option = document.createElement('option');
     option.value = i;
     option.textContent = i;
     dropdown.appendChild(option);
 }
 
-updateRecordDisplay();
+initializeRecordDisplay();
 
 function isMobile() {
     return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
@@ -150,8 +241,7 @@ function startGame() {
     bracketPos = 0;
     document.getElementById("main").textContent = bracket_first_x(mainString, 0, bracketSize);
 
-    document.addEventListener("keydown", restartKey);
-    document.addEventListener("keydown", keyHandler);
+    attachGameListeners();
 }
 
 function mainMenu() {
@@ -172,38 +262,53 @@ function mainMenu() {
 }
 
 function restartKey(event){
-    let keyPressed = event.key;
-    if (keyPressed === "r"){
+    if (event.key === "r"){
+        document.removeEventListener("keydown", restartKey);
+        document.removeEventListener("keydown", keyHandler);
         startGame();
     }
 }
 
-function winGame() {
+async function winGame() {
     clearInterval(timerInterval);
     let elapsed = Date.now() - startTime;
     label1.style.color = "green";
     bracketPos = 0;
     document.getElementById("main").textContent = "";
     gameActive = false;
+
     let recordLabel = document.getElementById(mainString.length.toString());
     let idx = mainString.length - 8;
+
     if (records[idx] === null || elapsed < records[idx]) {
         records[idx] = elapsed;
-        recordLabel.textContent = `${mainString.length}: ${(elapsed / 1000).toFixed(3)}s`;
+
+        let textSpan = recordLabel.querySelector('.record-text');
+
+        if (!textSpan) {
+            textSpan = document.createElement('span');
+            textSpan.classList.add('record-text');
+            recordLabel.appendChild(textSpan);
+        }
+
+        textSpan.textContent = `${mainString.length}: ${(elapsed / 1000).toFixed(3)}s`;
     }
+
     label1.textContent = `You win! Time: ${(elapsed / 1000).toFixed(3)} s. Record: ${(records[idx] / 1000).toFixed(3)} s`;
+
     document.removeEventListener("keydown", keyHandler);
     document.addEventListener("keydown", restartKey);
-    difficulty.textContent += "\nSeed: "+seed+"\nMoves: "+movesArr.length;
+
     reveal.style.display = "inline-block";
     restart.textContent = "Play again";
 
-    completions[idx]++;
-    averageTimes[idx] = ((averageTimes[idx] * (completions[idx] - 1)) + elapsed) / completions[idx];
 
-    let recordTime = records[mainString.length - 8] / 1000;
+    completionCounts[idx]++;
+    averageTimes[idx] = ((averageTimes[idx] * (completionCounts[idx] - 1)) + elapsed) / completionCounts[idx];
+
+    let recordTime = records[idx] / 1000;
     let isNewBest = elapsed / 1000 <= recordTime;
-    
+
     showWinPopup(
         mainString.length,
         elapsed / 1000,
@@ -213,6 +318,12 @@ function winGame() {
         isNewBest
     );
 
+    await syncRunResult({
+        time: elapsed,
+        moves: movesArr.length,
+        difficulty: mainString.length,
+        seed: seed,
+    });
     updateRecordDisplay();
 }
 
@@ -238,34 +349,50 @@ closePopup.addEventListener("click", () => {
 
 const tooltip = document.getElementById('tooltip');
 
-function updateRecordDisplay() {
-    for (let i = 8; i <= 36; i++) {
-        const recordLabel = document.getElementById(i.toString());
-        const rec = records[i - 8];
-        const avg = averageTimes[i - 8];
-        const comp = completions[i - 8];
+window.openAuthModal = function(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.add("active");
+  label1.style.marginTop = "4vw";
+};
 
-        recordLabel.textContent = `${i}: ${rec ? (rec / 1000).toFixed(3) + 's' : '--:--.---'}`;
+window.closeAuthModal = async function(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove("active");
+    label1.style.marginTop = "0vw";
+    document.getElementById("loggedin").textContent = `Logged in as ${localStorage.getItem("loggedInUser")}`;
+    document.getElementById("loggedin").style.display = "block";
+    document.getElementById("logout").style.display = "inline-block";
+    const data = await syncUserData();
 
-        recordLabel.onmouseenter = null;
-        recordLabel.onmousemove = null;
-        recordLabel.onmouseleave = null;
+    const completionCountsMap = Object.fromEntries(
+    (data?.completions || []).map(c => [c.difficulty, c.count ? c.count : 0])
+    );
 
-        recordLabel.addEventListener('mouseenter', (e) => {
-            tooltip.style.display = 'block';
-            tooltip.textContent = rec !== null
-                ? `Completions: ${comp} | Average: ${(avg / 1000).toFixed(3)}s`
-                : "No completions yet";
-        });
+    completionCounts = completionCountsMap;
+    records = data?.records || records;
 
-        recordLabel.addEventListener('mousemove', (e) => {
-            tooltip.style.left = (e.pageX + 10) + 'px';
-            tooltip.style.top = (e.pageY + 10) + 'px';
-        });
-
-        recordLabel.addEventListener('mouseleave', () => {
-            tooltip.style.display = 'none';
-        });
-    }
+    updateRecordDisplay();
 }
+
+  // switch between login/signup
+window.switchToSignup = function() {
+    closeAuthModal("loginModal");
+    openAuthModal("signupModal");
+};
+
+window.switchToLogin = function() {
+    closeAuthModal("signupModal");
+    openAuthModal("loginModal");
+};
+
+  // auto-open login modal if no user in localStorage
+window.addEventListener("DOMContentLoaded", () => {
+    const loggedInUser = localStorage.getItem("loggedInUser");
+    if (!loggedInUser) {
+      openAuthModal("loginModal");
+    }
+    else {
+        ign = loggedInUser;
+    }
+});
 

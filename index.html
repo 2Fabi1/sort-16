@@ -1,133 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sort16</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body data-theme="light">
-
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-theme="light">
     <button id="darkModeToggle" aria-label="Toggle Dark Mode">
-        <span id="themeIcon">🌙</span>
+      <span id="themeIcon">🌙</span>
     </button>
 
+    <div id="loginModal" class="auth-modal">
+    <div class="auth-modal-content">
+        <h2>Login</h2>
+        <input type="text" id="loginUsername" placeholder="Username">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button onclick="login(document.getElementById('loginUsername').value, document.getElementById('loginPassword').value)">Login</button>
+        <p>Don't have an account? <span class="link" onclick="switchToSignup()">Create one</span></p>
+    </div>
+    </div>
+
+    <div id="signupModal" class="auth-modal">
+    <div class="auth-modal-content">
+        <h2>Create Account</h2>
+        <input type="text" id="signupUsername" placeholder="Username">
+        <input type="password" id="signupPassword" placeholder="Password">
+        <button onclick="register(document.getElementById('signupUsername').value, document.getElementById('signupPassword').value)">Create Account</button>
+        <p>Already have an account? <span class="link" onclick="switchToLogin()">Login</span></p>
+    </div>
+    </div>
+
     <div class="records">
+      <div class="records-header">
         <h2>Records (s):</h2>
-        <div id="record-list"></div>
+        <button onclick="swap()" id="swapRecordTypeBtn">Completions</button>
+      </div>
+      <div id="record-list"></div>
     </div>
 
     <div class="mainmenu">
-        <h1>Sort16</h1>
-        <h2 id="difficulty"></h2>
-        <h3 class="label1">Select character number (8-36): </h3>
-        <select id="choice"></select>
-        <button onclick="startGame()" id="play">Play</button>
-        <button onclick="tutorial_func()" id="tutorialBtn">Tutorial</button>
-        <p id="main"></p>
-        <div id="button-container" style="display: flex; gap: 10px;">
-            <button onclick="startGame()" id="restart" style="display:none">Restart</button>
-            <button onclick="mainMenu()" id="menu" style="display:none">Main menu</button>
-            <button onclick="showMoves()" id="reveal" style="display:none">Reveal solution</button>
+      <div class="mainmenu-header">
+            <p id="loggedin" style="display: none"></p>
+            <button id="logout" style="display: none">Log out</button>
+            <h1 id="mainheader">Sort16</h1>
+      </div>
+      <h2 id="difficulty"></h2>
+      <h3 class="label1">Select character number (8-36):</h3>
+      <select id="choice"></select>
+      <button onclick="startGame()" id="play">Play</button>
+      <button onclick="tutorial_func()" id="tutorialBtn">Tutorial</button>
+      <p id="main"></p>
+      <div id="button-container" style="display: flex; gap: 10px">
+        <button onclick="startGame()" id="restart" style="display: none">
+          Restart
+        </button>
+        <button onclick="mainMenu()" id="menu" style="display: none">
+          Main menu
+        </button>
+        <button onclick="showMoves()" id="reveal" style="display: none">
+          Reveal solution
+        </button>
+      </div>
+      <span id="solution"></span>
+      <div class="mobileControls" style="display: none">
+        <h2>Mobile Controls:</h2>
+        <div class="bracket-controls">
+          <p>Brackets:</p>
+          <button onclick="keyHandler({key: 'a'})">Left</button>
+          <button onclick="keyHandler({key: 'd'})">Right</button>
+          <p>Characters:</p>
+          <button onclick="keyHandler({key: 'ArrowLeft'})">Shift left</button>
+          <button onclick="keyHandler({key: 'ArrowRight'})">Shift right</button>
         </div>
-        <span id="solution"></span>
-        <div class="mobileControls">
-            <h2>Mobile Controls:</h2>
-            <div class="bracket-controls">
-                <p>Brackets:</p>
-                <button onclick="keyHandler({key: 'a'})">Left</button>
-                <button onclick="keyHandler({key: 'd'})">Right</button>
-                <p>Characters:</p>
-                <button onclick="keyHandler({key: 'ArrowLeft'})">Shift left</button>
-                <button onclick="keyHandler({key: 'ArrowRight'})">Shift right</button>
-            </div>
-        </div>
-        <div id="tutorialModal" class="modal inactive">
-            <div class="modal-content">
-                <span id="closeTutorial" class="close">&times;</span>
-                <h2>How to Play</h2>
-                <p>Welcome to <strong>Sort16</strong>!</p>
-                <div class="tutorial-row">
-                    <span class="key">A</span>
-                    <span class="text">Moves the bracket to the left</span>
-                </div>
-        
-                <div class="tutorial-row">
-                    <span class="key">D</span>
-                    <span class="text">Moves the bracket to the right</span>
-                </div>
-        
-                <div class="tutorial-row">
-                    <span class="key">←</span>
-                    <span class="text">Shift characters inside the bracket left</span>
-                </div>
-        
-                <div class="tutorial-row">
-                    <span class="key">→</span>
-                    <span class="text">Shift characters inside the bracket right</span>
-                </div>
-        
-                <h2 id="goal">Goal</h2>
-                <p id="scrambled">Sort the scrambled into the original form - 0-9,A-Z!</p>
-                <p id="try">Here, try it out:</p>
-                <p id="tutorial_string"></p>
-        
-            </div>
-        </div>
+      </div>
+      <div id="tutorialModal" class="modal inactive">
+        <div class="modal-content">
+          <span id="closeTutorial" class="close">&times;</span>
+          <h2>How to Play</h2>
+          <p>Welcome to <strong>Sort16</strong>!</p>
+          <div class="tutorial-row">
+            <span class="key">A</span>
+            <span class="text">Moves the bracket to the left</span>
+          </div>
 
-        <div id="winPopup" class="popup hidden">
-            <div class="popup-content">
-                <span id="closePopup" class="close">&times;</span>
-                <h1>YOU WIN!</h1>
-                <table class="popup-stats">
-                    <tbody>
-                        <tr>
-                        <th class="left">Difficulty</th>
-                        <th class="right">Time</th>
-                        </tr>
-                        <tr>
-                        <td id="popupDifficulty" class="left"></td>
-                        <td class="right" id="popupTime"></td>
-                        </tr>
-                        <tr>
-                        <th class="left">Moves</th>
-                        <th class="right">Seed</th>
-                        </tr>
-                        <tr>
-                        <td class="left" id="popupMoves"></td>
-                        <td class="right" id="popupSeed"></td>
-                        </tr>
-                        <tr>
-                        <th class="left" colspan="2">Record</th>
-                        </tr>
-                        <tr>
-                        <td colspan="2">
-                            <span id="popupRecord"></span>
-                            <span id="newBest" class="new-best">New best!</span>
-                        </td>
-                        </tr>
-                    </tbody>
-                </table>
-        
-                <div class="popup-buttons">
-                    <button onclick="hideWinPopup(); startGame();">Play again</button>
-                </div>
-        
-            </div>
-            </div>        
+          <div class="tutorial-row">
+            <span class="key">D</span>
+            <span class="text">Moves the bracket to the right</span>
+          </div>
 
-        <div id="tooltip" style="position:absolute; display:none; background:var(--panel-bg); color:var(--text-color); padding:6px 10px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.2); pointer-events:none; z-index:100;"></div>
-        <div style="margin-top: 20px;">
-            <button onclick="exportRecords()">Export Records</button>
-            <button onclick="importRecords()">Import Records</button>
+          <div class="tutorial-row">
+            <span class="key">←</span>
+            <span class="text">Shift characters inside the bracket left</span>
+          </div>
+
+          <div class="tutorial-row">
+            <span class="key">→</span>
+            <span class="text">Shift characters inside the bracket right</span>
+          </div>
+
+          <h2 id="goal">Goal</h2>
+          <p id="scrambled">
+            Sort the scrambled into the original form - 0-9,A-Z!
+          </p>
+          <p id="try">Here, try it out:</p>
+          <p id="tutorial_string"></p>
         </div>
+      </div>
+
+      <div id="winPopup" class="popup hidden">
+        <div class="popup-content">
+          <span id="closePopup" class="close">&times;</span>
+          <h1>YOU WIN!</h1>
+          <table class="popup-stats">
+            <tbody>
+              <tr>
+                <th class="left">Difficulty</th>
+                <th class="right">Time</th>
+              </tr>
+              <tr>
+                <td id="popupDifficulty" class="left"></td>
+                <td class="right" id="popupTime"></td>
+              </tr>
+              <tr>
+                <th class="left">Moves</th>
+                <th class="right">Seed</th>
+              </tr>
+              <tr>
+                <td class="left" id="popupMoves"></td>
+                <td class="right" id="popupSeed"></td>
+              </tr>
+              <tr>
+                <th class="left" colspan="2">Record</th>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <span id="popupRecord"></span>
+                  <span id="newBest" class="new-best">New best!</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="popup-buttons">
+            <button onclick="hideWinPopup(); startGame();">Play again</button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="tooltip"
+        style="
+          position: absolute;
+          display: none;
+          background: var(--panel-bg);
+          color: var(--text-color);
+          padding: 6px 10px;
+          border-radius: 6px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          pointer-events: none;
+          z-index: 100;
+        "
+      ></div>
+      <div style="margin-top: 20px">
+        <button onclick="apiTest()">Health check</button>
+      </div>
     </div>
+
+    <div id="authNotification"></div>
 
     <script src="helper.js"></script>
     <script src="script.js"></script>
     <script src="tutorial.js"></script>
+    <script src="adapter.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-</body>
+  </body>
 </html>
-
-

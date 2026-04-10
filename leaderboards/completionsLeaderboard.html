@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Completion Leaderboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="light">
+    <button id="darkModeToggle" aria-label="Toggle Dark Mode">
+            <span id="themeIcon">🌙</span>
+    </button>
+    <h1>Leaderboard</h1>
+    <div class="title-controls">
+        <h2 id="completions-title"></h2>
+        <div class="buttons">
+            <button id="goBack">&#60;</button>
+            <input type="number" id="pageInput" min="8" max="36">
+            <button id="goNext">&#62;</button>
+        </div>
+    </div>
+
+    <table id="leaderboard-table">
+        <thead>
+        <tr>
+            <th>Place</th>
+            <th>Player</th>
+            <th>Number of completions</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+  </table>
+
+<script src="../adapter.js"></script>
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+let difficulty = parseInt(urlParams.get('difficulty')) || 8;
+
+const tbody = document.querySelector('#leaderboard-table tbody');
+const pageInput = document.getElementById('pageInput');
+const difficultyTitle = document.getElementById('completions-title');
+
+const backBtn = document.getElementById('goBack');
+const nextBtn = document.getElementById('goNext');
+
+function updateTitle() {
+    difficultyTitle.textContent = `Completions leaderboard (${difficulty} characters)`;
+    pageInput.value = difficulty;
+}
+
+async function loadLeaderboard() {
+    try {
+        const data = await loadCompletionLeaderboard(difficulty);
+        console.log("Completion leaderboard:", data);
+        tbody.innerHTML = '';
+
+        (data || []).forEach((row, index) => {
+            const tr = document.createElement('tr');
+
+            const rank = document.createElement('td');
+            rank.textContent = index + 1;
+
+            const user = document.createElement('td');
+            user.textContent = row.username || row.Username || 'Anonymous';
+
+            const count = document.createElement('td');
+            count.textContent = row.count ?? row.Count ?? 0;
+
+            tr.append(rank, user, count);
+            tbody.appendChild(tr);
+        });
+
+    } catch (err) {
+        console.error("Leaderboard loading failed:", err);
+    }
+}
+
+function changePage(newDiff) {
+    newDiff = Number(newDiff);
+
+    if (newDiff < 8) difficulty = 36;
+    else if (newDiff > 36) difficulty = 8;
+    else difficulty = newDiff;
+
+    updateTitle();
+    history.replaceState(null, '', `?difficulty=${difficulty}`);
+    loadLeaderboard();
+}
+
+backBtn.addEventListener('click', () => changePage(difficulty - 1));
+nextBtn.addEventListener('click', () => changePage(difficulty + 1));
+
+pageInput.addEventListener('change', () => {
+    const val = parseInt(pageInput.value);
+    if (!isNaN(val)) {
+        changePage(Math.max(8, Math.min(36, val)));
+    }
+});
+
+updateTitle();
+loadLeaderboard();
+
+/* ----------------------
+   DARK MODE
+---------------------- */
+
+const toggle = document.getElementById('darkModeToggle');
+const themeIcon = document.getElementById('themeIcon');
+
+function updateIcon(theme) {
+    themeIcon.textContent = theme === 'dark' ? '🌞' : '🌙';
+}
+
+toggle.addEventListener('click', () => {
+    const currentTheme = document.body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateIcon(newTheme);
+});
+
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.body.setAttribute('data-theme', savedTheme);
+updateIcon(savedTheme);
+</script>
+</body>
+</html>

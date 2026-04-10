@@ -8,7 +8,7 @@ function showWinPopup(difficulty, time, moves, seed, record, isNewBest) {
     document.getElementById('popupTime').textContent = time.toFixed(3);
     document.getElementById('popupMoves').textContent = moves;
     document.getElementById('popupSeed').textContent = seed;
-    document.getElementById('popupRecord').textContent = record.toFixed(3) + "s";
+    document.getElementById('popupRecord').textContent = record ? record.toFixed(3) + "s" : time.toFixed(3) + "s";
     document.getElementById('newBest').style.display = isNewBest ? 'inline-block' : 'none';
     
     popup.classList.remove('hidden');
@@ -54,40 +54,19 @@ function showMoves() {
     sol.style.display = "block";
 }
 
-function exportRecords() {
-
-    const data = {
-        records: records,
-        completions: completions,
-        averageTimes: averageTimes
-    };
-    const jsonStr = JSON.stringify(data);
-    const encrypted = CryptoJS.AES.encrypt(jsonStr, secretKey).toString();
-    const encoded = btoa(encrypted);
-    navigator.clipboard.writeText(encoded).then(() => {
-        alert("Game records copied to clipboard!");
-    }).catch(() => {
-        alert("Failed to copy. Here’s the string:\n" + encoded);
-    });
-}
-
-function importRecords() {
-    const input = prompt("Paste your saved records string:");
-    if (!input) return;
-    try {
-        const encrypted = atob(input);
-        const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-        const data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-        if (data.records && Array.isArray(data.records)) {
-            records = data.records;
-            completions = data.completions;
-            averageTimes = data.averageTimes;
-            updateRecordDisplay();
-            alert("Records imported successfully!");
-        } else {
-            alert("Invalid data!");
-        }
-    } catch (e) {
-        alert("Failed to import records. The string may be invalid.");
-    }
+function showAuthNotification(message, type = "green") {
+  const notif = document.getElementById("authNotification");
+  notif.textContent = message;
+  notif.className = ""; // reset classes
+  notif.classList.add(type);
+  
+  notif.style.backgroundColor = type;
+  notif.style.opacity = "1";
+  notif.style.transform = "translateX(-50%) translateY(0)";
+  
+  // Hide after 3s
+  setTimeout(() => {
+    notif.style.opacity = "0";
+    notif.style.transform = "translateX(-50%) translateY(-20px)";
+  }, 3000);
 }
