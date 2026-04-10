@@ -144,6 +144,15 @@ async function loadRecordsByDifficulty(difficulty) {
   }
 }
 
+async function getUsername(){
+  try {
+    return await request(`/api/auth/me`);
+  } catch {
+    console.error("Failed to load username");
+    return null;
+  }
+}
+
 // =========================
 // COMPLETIONS
 // =========================

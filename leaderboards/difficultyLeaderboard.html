@@ -68,7 +68,7 @@ async function loadLeaderboard() {
             const seed = document.createElement('td');
             seed.textContent = row.seed;
             const date = document.createElement('td');
-            date.textContent = new Date(row.achievedAt).toLocaleDateString();
+            date.textContent = new Date(row.achievedAt).toLocaleString();
             tr.append(rank, user, time, moves, seed, date);
             tbody.appendChild(tr);
         });

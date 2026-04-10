@@ -359,7 +359,7 @@ window.closeAuthModal = async function(id) {
     const el = document.getElementById(id);
     if (el) el.classList.remove("active");
     label1.style.marginTop = "0vw";
-    document.getElementById("loggedin").textContent = `Logged in as ${localStorage.getItem("loggedInUser")}`;
+    document.getElementById("loggedin").textContent = `Logged in as ${getUsername()}`;
     document.getElementById("loggedin").style.display = "block";
     document.getElementById("logout").style.display = "inline-block";
     const data = await syncUserData();
