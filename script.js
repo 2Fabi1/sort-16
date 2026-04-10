@@ -355,23 +355,25 @@ window.openAuthModal = function(id) {
   label1.style.marginTop = "4vw";
 };
 
-window.closeAuthModal = async function(id) {
+window.closeAuthModal = async function(id, loggedIn = false) {
     const el = document.getElementById(id);
     if (el) el.classList.remove("active");
     label1.style.marginTop = "0vw";
-    document.getElementById("loggedin").textContent = `Logged in as ${getUsername()}`;
-    document.getElementById("loggedin").style.display = "block";
-    document.getElementById("logout").style.display = "inline-block";
-    const data = await syncUserData();
+    if (loggedIn) {
+        document.getElementById("loggedin").textContent = `Logged in as ${getUsername()}`;
+        document.getElementById("loggedin").style.display = "block";
+        document.getElementById("logout").style.display = "inline-block";
+        const data = await syncUserData();
 
-    const completionCountsMap = Object.fromEntries(
-    (data?.completions || []).map(c => [c.difficulty, c.count ? c.count : 0])
-    );
+        const completionCountsMap = Object.fromEntries(
+        (data?.completions || []).map(c => [c.difficulty, c.count ? c.count : 0])
+        );
 
-    completionCounts = completionCountsMap;
-    records = data?.records || records;
+        completionCounts = completionCountsMap;
+        records = data?.records || records;
 
-    updateRecordDisplay();
+        updateRecordDisplay();
+    }
 }
 
   // switch between login/signup

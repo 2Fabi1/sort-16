@@ -59,7 +59,7 @@ async function login(username, password) {
     });
 
     showAuthNotification("Logged in successfully");
-    closeAuthModal("loginModal");
+    closeAuthModal("loginModal", true);
   } catch (err) {
     if (err.status === 401) {
       showAuthNotification("Username or password are invalid", "red");
