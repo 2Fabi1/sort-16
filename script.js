@@ -32,7 +32,6 @@ let completionsShow = false;
 
 let records = Array(29).fill(null);
 let completionCounts = {};
-let averageTimes = Array(29).fill(0);
 
 const recordList = document.getElementById('record-list');
 const dropdown = document.getElementById('choice');
@@ -130,8 +129,7 @@ function updateRecordDisplay() {
         }
 
         if(!completionsShow) {
-            const recObj = records.find(r => r.difficulty === i);
-            const rec = recObj?.time;
+            rec = records[i - 8];
             textSpan.textContent = `${i}: ${rec ? (rec / 1000).toFixed(3) + 's' : '--:--.---'}`;
         } else {
             const comp = completionCounts[i] ?? 0;
@@ -301,13 +299,16 @@ async function winGame() {
 
     reveal.style.display = "inline-block";
     restart.textContent = "Play again";
+    completionCounts[idx] = (completionCounts[idx] || 0) + 1;
 
+    let previousRecord = records[idx];
 
-    completionCounts[idx]++;
-    averageTimes[idx] = ((averageTimes[idx] * (completionCounts[idx] - 1)) + elapsed) / completionCounts[idx];
+    if (previousRecord === null || elapsed < previousRecord) {
+        records[idx] = elapsed;
+    }
 
-    let recordTime = records[idx] ? records[idx] / 1000 : elapsed / 1000;
-    let isNewBest = elapsed / 1000 <= recordTime;
+    let recordTime = records[idx] / 1000;
+    let isNewBest = previousRecord === null || elapsed < previousRecord;
     updateRecordDisplay();
     showWinPopup(
         mainString.length,

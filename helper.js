@@ -8,12 +8,13 @@ function showWinPopup(difficulty, time, moves, seed, record, isNewBest) {
     document.getElementById('popupTime').textContent = time.toFixed(3);
     document.getElementById('popupMoves').textContent = moves;
     document.getElementById('popupSeed').textContent = seed;
-    document.getElementById('popupRecord').textContent = record ? record.toFixed(3) + "s" : time.toFixed(3) + "s";
-    document.getElementById('newBest').style.display = isNewBest ? 'inline-block' : 'none';
-    
-    popup.classList.remove('hidden');
-}
+    document.getElementById('popupRecord').textContent =
+        record ? record.toFixed(3) + "s" : time.toFixed(3) + "s";
 
+    document.getElementById('newBest').style.display =
+        isNewBest ? 'inline-block' : 'none';
+    popup.style.display = "block";
+}
 function hideWinPopup() {
     popup.classList.add('hidden');
 }
