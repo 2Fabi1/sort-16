@@ -303,12 +303,12 @@ async function winGame() {
 
     let previousRecord = records[idx];
 
-    if (previousRecord === null || elapsed < previousRecord) {
-        records[idx] = elapsed;
+    if (previousRecord === null || elapsed < previousRecord.time) {
+        records[idx].time = elapsed;
     }
 
-    let recordTime = records[idx] / 1000;
-    let isNewBest = previousRecord === null || elapsed < previousRecord;
+    let recordTime = records[idx].time / 1000;
+    let isNewBest = previousRecord === null || elapsed < previousRecord.time;
     updateRecordDisplay();
     showWinPopup(
         mainString.length,

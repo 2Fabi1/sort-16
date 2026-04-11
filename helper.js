@@ -5,7 +5,7 @@ const mobile = document.getElementById("mobileControls");
 
 function showWinPopup(difficulty, time, moves, seed, record, isNewBest) {
     document.getElementById('popupDifficulty').textContent = difficulty;
-    document.getElementById('popupTime').textContent = time.toFixed(3);
+    document.getElementById('popupTime').textContent = time.toFixed(3) + "s";
     document.getElementById('popupMoves').textContent = moves;
     document.getElementById('popupSeed').textContent = seed;
     document.getElementById('popupRecord').textContent =
@@ -13,7 +13,7 @@ function showWinPopup(difficulty, time, moves, seed, record, isNewBest) {
 
     document.getElementById('newBest').style.display =
         isNewBest ? 'inline-block' : 'none';
-    popup.style.display = "block";
+    popup.style.display = "flex";
 }
 function hideWinPopup() {
     popup.classList.add('hidden');
