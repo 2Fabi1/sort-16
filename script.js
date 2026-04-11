@@ -278,8 +278,8 @@ async function winGame() {
     let recordLabel = document.getElementById(mainString.length.toString());
     let idx = mainString.length - 8;
 
-    if (records[idx] === null || elapsed < records[idx]) {
-        records[idx] = elapsed;
+    if (records[idx] === null || elapsed < records[idx].time) {
+        records[idx].time = elapsed;
 
         let textSpan = recordLabel.querySelector('.record-text');
 
@@ -292,7 +292,7 @@ async function winGame() {
         textSpan.textContent = `${mainString.length}: ${(elapsed / 1000).toFixed(3)}s`;
     }
 
-    label1.textContent = `You win! Time: ${(elapsed / 1000).toFixed(3)} s. Record: ${(records[idx] ? records[idx] / 1000 : elapsed / 1000).toFixed(3)} s`;
+    label1.textContent = `You win! Time: ${(elapsed / 1000).toFixed(3)} s. Record: ${(records[idx] ? records[idx].time / 1000 : elapsed / 1000).toFixed(3)} s`;
 
     document.removeEventListener("keydown", keyHandler);
     document.addEventListener("keydown", restartKey);
