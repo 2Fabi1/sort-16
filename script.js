@@ -130,7 +130,7 @@ function updateRecordDisplay() {
 
         if(!completionsShow) {
             rec = records[i - 8];
-            textSpan.textContent = `${i}: ${rec ? (Number(rec) / 1000).toFixed(3) + 's' : '--:--.---'}`;
+            textSpan.textContent = `${i}: ${rec ? (rec.time / 1000).toFixed(3) + 's' : '--:--.---'}`;
         } else {
             const comp = completionCounts[i] ?? 0;
             textSpan.textContent = `${i}: ${comp}`;
