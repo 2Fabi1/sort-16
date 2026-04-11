@@ -294,7 +294,7 @@ async function winGame() {
         textSpan.textContent = `${mainString.length}: ${(elapsed / 1000).toFixed(3)}s`;
     }
 
-    label1.textContent = `You win! Time: ${(elapsed / 1000).toFixed(3)} s. Record: ${(records[idx] / 1000).toFixed(3)} s`;
+    label1.textContent = `You win! Time: ${(elapsed / 1000).toFixed(3)} s. Record: ${(records[idx] ? records[idx] / 1000 : elapsed / 1000).toFixed(3)} s`;
 
     document.removeEventListener("keydown", keyHandler);
     document.addEventListener("keydown", restartKey);
@@ -306,7 +306,7 @@ async function winGame() {
     completionCounts[idx]++;
     averageTimes[idx] = ((averageTimes[idx] * (completionCounts[idx] - 1)) + elapsed) / completionCounts[idx];
 
-    let recordTime = records[idx] / 1000;
+    let recordTime = records[idx] ? records[idx] / 1000 : elapsed / 1000;
     let isNewBest = elapsed / 1000 <= recordTime;
 
     showWinPopup(
