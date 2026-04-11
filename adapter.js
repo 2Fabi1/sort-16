@@ -217,38 +217,35 @@ async function syncUserData() {
 
 function simulateGameFromSeed(seed, moves, time) {
     const template = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
+    console.log(moves);
     let mainString = seed;
     let bracketPos = 0;
     let bracketSize = Math.ceil(seed.length / 2);
-    let movesArr = [];
-    if (time / moves.length < 67) return false; // Too fast, likely invalid
+    console.log(time, moves.length);
+    if (time / moves.length < 67) return false;
     for (let i = 0; i < moves.length; i++) {
         let move = moves[i];
         let stringLen = mainString.length;
         let shifting = mainString.slice(bracketPos, bracketPos + bracketSize);
         if (move === "BracketLeft" && bracketPos > 0) {
             bracketPos--;
-            movesArr.push(move);
         }
         else if (move === "BracketRight" && bracketPos + bracketSize < stringLen) {
             bracketPos++;
-            movesArr.push(move);
         }
         else if (move === "CharsLeft" && shifting) {
             mainString =
                 mainString.slice(0, bracketPos) +
                 shiftByOne(shifting, "left") +
                 mainString.slice(bracketPos + bracketSize);
-            movesArr.push(move);
         }
         else if (move === "CharsRight" && shifting) {
             mainString =
                 mainString.slice(0, bracketPos) +
                 shiftByOne(shifting, "right") +
                 mainString.slice(bracketPos + bracketSize);
-            movesArr.push(move);
         }
+        console.log(mainString);
     }
     return mainString === template.slice(0, stringLen);
 }
