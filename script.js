@@ -295,7 +295,6 @@ async function winGame() {
     label1.textContent = `You win! Time: ${(elapsed / 1000).toFixed(3)} s. Record: ${(records[idx] ? records[idx].time / 1000 : elapsed / 1000).toFixed(3)} s`;
 
     document.removeEventListener("keydown", keyHandler);
-    document.addEventListener("keydown", restartKey);
 
     reveal.style.display = "inline-block";
     restart.textContent = "Play again";
