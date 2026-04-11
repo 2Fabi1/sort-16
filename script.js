@@ -308,7 +308,7 @@ async function winGame() {
 
     let recordTime = records[idx] ? records[idx] / 1000 : elapsed / 1000;
     let isNewBest = elapsed / 1000 <= recordTime;
-
+    updateRecordDisplay();
     showWinPopup(
         mainString.length,
         elapsed / 1000,
@@ -317,14 +317,12 @@ async function winGame() {
         recordTime,
         isNewBest
     );
-
     await syncRunResult({
         time: elapsed,
         moves: movesArr.length,
         difficulty: mainString.length,
         seed: seed,
     });
-    updateRecordDisplay();
 }
 
 tutorialBtn.addEventListener("click", () => {
