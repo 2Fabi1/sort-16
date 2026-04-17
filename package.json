@@ -6,12 +6,16 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
-		"preview": "vite preview",
+		"preview": "wrangler dev",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"deploy": "npm run build && wrangler deploy",
+		"db:migrate:local": "wrangler d1 migrations apply sort-16-db --local",
+		"db:migrate:remote": "wrangler d1 migrations apply sort-16-db --remote"
 	},
 	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20260417.1",
 		"@playwright/test": "^1.59.1",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/adapter-cloudflare": "^7.2.8",
@@ -19,7 +23,6 @@
 		"@sveltejs/kit": "^2.57.0",
 		"@sveltejs/vite-plugin-svelte": "^7.0.0",
 		"@types/bcryptjs": "^2.4.6",
-		"@types/better-sqlite3": "^7.6.13",
 		"svelte": "^5.55.2",
 		"svelte-check": "^4.4.6",
 		"typescript": "^6.0.2",
@@ -29,7 +32,6 @@
 	},
 	"dependencies": {
 		"bcryptjs": "^3.0.3",
-		"better-sqlite3": "^12.9.0",
 		"jose": "^6.2.2"
 	}
 }

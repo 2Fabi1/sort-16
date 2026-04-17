@@ -1,17 +1,19 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import db from '$lib/server/db';
+import { getDB } from '$lib/server/db';
 
-export const GET: RequestHandler = async ({ params }) => {
+export const GET: RequestHandler = async ({ params, platform }) => {
 	const difficulty = Number(params.difficulty);
 
 	if (isNaN(difficulty)) {
 		return json({ error: 'Invalid difficulty parameter.' }, { status: 400 });
 	}
 
-	const completions = db
+	const db = getDB(platform);
+	const { results } = await db
 		.prepare('SELECT * FROM completions WHERE difficulty = ? ORDER BY count DESC')
-		.all(difficulty);
+		.bind(difficulty)
+		.all();
 
-	return json(completions);
+	return json(results);
 };

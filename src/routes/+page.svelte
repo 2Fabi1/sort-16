@@ -107,7 +107,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: authUsername, password: authPassword })
       });
-      const json = await res.json();
+      const json = (await res.json()) as { error?: string; username?: string };
       if (!res.ok) {
         notify(json.error || 'Login failed', 'error');
         return;
@@ -132,7 +132,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: authUsername, password: authPassword })
       });
-      const json = await res.json();
+      const json = (await res.json()) as { error?: string };
       if (!res.ok) {
         notify(json.error || 'Registration failed', 'error');
         return;

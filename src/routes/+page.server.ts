@@ -1,16 +1,18 @@
 import type { PageServerLoad } from './$types';
-import db from '$lib/server/db';
+import { getDB } from '$lib/server/db';
 
-export const load: PageServerLoad = async ({ locals }) => {
-  if (!locals.user) return { records: [], completions: [] };
+export const load: PageServerLoad = async ({ locals, platform }) => {
+	if (!locals.user) return { records: [], completions: [] };
 
-  const records = db.prepare(
-    'SELECT * FROM best_times WHERE username = ? ORDER BY difficulty ASC'
-  ).all(locals.user.username);
+	const db = getDB(platform);
 
-  const completions = db.prepare(
-    'SELECT difficulty, count FROM completions WHERE username = ? ORDER BY difficulty ASC'
-  ).all(locals.user.username);
+	const [recordsResult, completionsResult] = await db.batch([
+		db.prepare('SELECT * FROM best_times WHERE username = ? ORDER BY difficulty ASC').bind(locals.user.username),
+		db.prepare('SELECT difficulty, count FROM completions WHERE username = ? ORDER BY difficulty ASC').bind(locals.user.username),
+	]);
 
-  return { records, completions };
+	return {
+		records: recordsResult.results,
+		completions: completionsResult.results,
+	};
 };

@@ -6,7 +6,13 @@
     "binding": "ASSETS"
   },
   "compatibility_date": "2026-04-17",
-  "compatibility_flags": ["nodejs_compat"]
-
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "sort-16-db",
+      "database_id": "REPLACE_WITH_ACTUAL_D1_DATABASE_ID",
+      "migrations_dir": "migrations"
+    }
+  ]
 }
-

@@ -64,7 +64,7 @@
 						<tr>
 							<td>{i + 1}</td>
 							<td>{record.username}</td>
-							<td>{formatTime(record.time) / 1000}s</td>
+							<td>{formatTime(record.time / 1000)}s</td>
 							<td>{record.moves}</td>
 							<td>{record.seed}</td>
 						</tr>
