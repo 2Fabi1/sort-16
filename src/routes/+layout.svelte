@@ -18,6 +18,8 @@
     if (stored === 'dark') {
       dark = true;
       document.body.setAttribute('data-theme', 'dark');
+    } else {
+      document.body.setAttribute('data-theme', 'light');
     }
   });
 
@@ -27,7 +29,7 @@
       document.body.setAttribute('data-theme', 'dark');
       localStorage.setItem('theme', 'dark');
     } else {
-      document.body.removeAttribute('data-theme');
+      document.body.setAttribute('data-theme', 'light');
       localStorage.setItem('theme', 'light');
     }
   }
@@ -100,7 +102,7 @@
     position: fixed;
     top: 20px;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(-20px);
     z-index: 100000;
     padding: 12px 20px;
     border-radius: 8px;
@@ -113,6 +115,7 @@
 
   #authNotification.visible {
     opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 
   #authNotification.success {

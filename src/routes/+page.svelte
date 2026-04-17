@@ -46,7 +46,7 @@
   // --- Game state ---
   type GameState = 'menu' | 'playing' | 'won';
   let gameState = $state<GameState>('menu');
-  let difficulty = $state(16);
+  let difficulty = $state(8);
   let gameString = $state('');
   let bracketPos = $state(0);
   let bracketSize = $derived(Math.ceil(difficulty / 2));
@@ -61,6 +61,7 @@
   let winTime = $state(0);
   let winMoves = $state(0);
   let isNewRecord = $state(false);
+  let showRevealBtn = $state(false);
 
   // --- Tutorial state ---
   let showTutorial = $state(false);
@@ -87,10 +88,7 @@
   let formattedTime = $derived(formatTime(elapsed));
 
   function formatTime(ms: number): string {
-    const totalSec = ms / 1000;
-    const mins = Math.floor(totalSec / 60);
-    const secs = (totalSec % 60).toFixed(3);
-    return `${mins.toString().padStart(2, '0')}:${secs.padStart(6, '0')}`;
+    return (ms / 1000).toFixed(3);
   }
 
   function formatRecordTime(timeMs: number): string {
@@ -168,6 +166,7 @@
     gameState = 'playing';
     showWinPopup = false;
     isNewRecord = false;
+    showRevealBtn = false;
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
       elapsed = Date.now() - startTime;
@@ -203,11 +202,13 @@
   function moveBracketLeft() {
     if (gameState !== 'playing' || showWinPopup) return;
     if (bracketPos > 0) bracketPos--;
+    moves++;
   }
 
   function moveBracketRight() {
     if (gameState !== 'playing' || showWinPopup) return;
     if (bracketPos + bracketSize < gameString.length) bracketPos++;
+    moves++;
   }
 
   function shiftLeft() {
@@ -245,6 +246,7 @@
     winTime = elapsed / 1000;
     winMoves = moves;
     gameState = 'won';
+    showRevealBtn = true;
 
     // Check if new record (compare in ms)
     const existing = localRecords[difficulty];
@@ -305,7 +307,7 @@
         break;
       case 'r':
         e.preventDefault();
-        restartGame();
+        startGame();
         break;
     }
   }
@@ -504,7 +506,7 @@
   </div>
 
   {#if gameState === 'menu'}
-    <h2 id="difficulty">Difficulty</h2>
+    <h2 id="difficulty"></h2>
     <h3 class="label1">Select character number (8-36):</h3>
     <select bind:value={difficulty}>
       {#each difficulties as d}
@@ -514,12 +516,15 @@
     <button onclick={startGame} id="play">Play</button>
     <button onclick={openTutorial} id="tutorialBtn">Tutorial</button>
   {:else}
-    <h2>{formattedTime}</h2>
+    <h2 id="difficulty">Difficulty: {difficulty} characters</h2>
+    <h3 class="label1">Time: {formattedTime} s</h3>
     <p id="main">{displayString}</p>
     <div id="button-container">
-      <button onclick={restartGame}>Restart</button>
+      <button onclick={restartGame}>{gameState === 'won' ? 'Play again' : 'Restart'}</button>
       <button onclick={goToMenu}>Main menu</button>
-      <button onclick={revealSolution}>Reveal solution</button>
+      {#if showRevealBtn}
+        <button onclick={revealSolution}>Reveal solution</button>
+      {/if}
     </div>
     <span id="solution"></span>
 
@@ -604,7 +609,7 @@
       <div class="popup-content" role="dialog" aria-modal="true">
         <!-- svelte-ignore a11y_interactive_supports_focus -->
         <!-- svelte-ignore a11y_click_events_have_key_events -->
-        <span class="close" role="button" onclick={() => { showWinPopup = false; goToMenu(); }}>&times;</span>
+        <span class="close" role="button" onclick={() => { showWinPopup = false; }}>&times;</span>
         <h1>YOU WIN!</h1>
         <table class="popup-stats">
           <tbody>
@@ -794,7 +799,6 @@
     margin-top: 30px;
     word-break: break-word;
     color: var(--text-color);
-    white-space: pre-wrap;
   }
 
   #button-container {

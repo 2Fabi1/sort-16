@@ -24,52 +24,61 @@
 	}
 </script>
 
-<h1>Leaderboard</h1>
+<div class="leaderboard-page">
+	<h1>Leaderboard</h1>
 
-<div class="title-controls">
-	<h2>Difficulty: {data.difficulty} characters</h2>
-	<div class="buttons">
-		<button onclick={() => navigate(data.difficulty - 1)}>&lt;</button>
-		<input
-			type="number"
-			min="8"
-			max="36"
-			value={data.difficulty}
-			oninput={handleInput}
-			onkeydown={handleKeydown}
-		/>
-		<button onclick={() => navigate(data.difficulty + 1)}>&gt;</button>
+	<div class="title-controls">
+		<h2>Difficulty: {data.difficulty} characters</h2>
+		<div class="buttons">
+			<button onclick={() => navigate(data.difficulty - 1)}>&lt;</button>
+			<input
+				type="number"
+				min="8"
+				max="36"
+				value={data.difficulty}
+				oninput={handleInput}
+				onkeydown={handleKeydown}
+			/>
+			<button onclick={() => navigate(data.difficulty + 1)}>&gt;</button>
+		</div>
 	</div>
+
+	{#if data.records.length === 0}
+		<p>No records yet.</p>
+	{:else}
+		<table>
+			<thead>
+				<tr>
+					<th>Place</th>
+					<th>Player</th>
+					<th>Time</th>
+					<th>Number of moves</th>
+					<th>Seed</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each data.records as record, i}
+					<tr>
+						<td>{i + 1}</td>
+						<td>{record.username}</td>
+						<td>{(record.time / 1000).toFixed(3)} s</td>
+						<td>{record.moves}</td>
+						<td>{record.seed}</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	{/if}
 </div>
 
-{#if data.records.length === 0}
-	<p>No records yet.</p>
-{:else}
-	<table>
-		<thead>
-			<tr>
-				<th>Place</th>
-				<th>Player</th>
-				<th>Time</th>
-				<th>Number of moves</th>
-				<th>Seed</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each data.records as record, i}
-				<tr>
-					<td>{i + 1}</td>
-					<td>{record.username}</td>
-					<td>{(record.time / 1000).toFixed(3)} s</td>
-					<td>{record.moves}</td>
-					<td>{record.seed}</td>
-				</tr>
-			{/each}
-		</tbody>
-	</table>
-{/if}
-
 <style>
+	.leaderboard-page {
+		display: block;
+		max-width: 900px;
+		margin: 0 auto;
+		width: 100%;
+	}
+
 	h1, h2 {
 		margin: 0 0 10px 0;
 		color: var(--primary-color);
@@ -84,11 +93,13 @@
 		border-radius: 12px;
 		overflow: hidden;
 		box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+		transition: background 0.3s;
 	}
 
 	th, td {
 		padding: 12px 10px;
 		text-align: center;
+		transition: background 0.3s, color 0.3s;
 	}
 
 	th {
@@ -96,6 +107,7 @@
 		font-weight: 600;
 	}
 
+	tbody tr { transition: background 0.2s; }
 	tbody tr:hover { background: var(--hover-bg); }
 	tbody td { border-bottom: 1px solid var(--bg-color); }
 
@@ -128,6 +140,7 @@
 		outline: none;
 		width: 60px;
 		text-align: center;
+		transition: border 0.2s, box-shadow 0.2s;
 	}
 	input[type="number"]:hover { border-color: var(--primary-color); }
 	input[type="number"]:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
