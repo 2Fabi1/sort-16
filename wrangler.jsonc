@@ -9,7 +9,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "d1_databases": [
     {
-      "binding": "sort_16_db",
+      "binding": "DB",
       "database_name": "sort-16-db",
       "database_id": "60b001f7-f2e4-4a38-ae60-14cb6a15e510",
       "migrations_dir": "migrations"
