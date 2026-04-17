@@ -2,7 +2,8 @@
   "name": "sort-16",
   "main": ".svelte-kit/cloudflare/_worker.js",
   "assets": {
-    "directory": ".svelte-kit/cloudflare"
+    "directory": ".svelte-kit/cloudflare",
+    "binding": "ASSETS"
   },
   "compatibility_date": "2026-04-17",
   "compatibility_flags": ["nodejs_compat"]
