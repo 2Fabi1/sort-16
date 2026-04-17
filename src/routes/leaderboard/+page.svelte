@@ -22,17 +22,13 @@
 			handleInput(e);
 		}
 	}
-
-	function formatTime(time: number): string {
-		return time.toFixed(3);
-	}
 </script>
 
-<div class="leaderboard-page">
-	<h1 class="title">Leaderboard</h1>
-	<p class="subtitle">Difficulty: {data.difficulty} characters</p>
+<h1>Leaderboard</h1>
 
-	<div class="nav-controls">
+<div class="title-controls">
+	<h2>Difficulty: {data.difficulty} characters</h2>
+	<div class="buttons">
 		<button onclick={() => navigate(data.difficulty - 1)}>&lt;</button>
 		<input
 			type="number"
@@ -44,123 +40,102 @@
 		/>
 		<button onclick={() => navigate(data.difficulty + 1)}>&gt;</button>
 	</div>
-
-	{#if data.records.length === 0}
-		<p class="empty-state">No records yet.</p>
-	{:else}
-		<div class="table-wrapper">
-			<table>
-				<thead>
-					<tr>
-						<th>Place</th>
-						<th>Player</th>
-						<th>Time</th>
-						<th>Moves</th>
-						<th>Seed</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each data.records as record, i}
-						<tr>
-							<td>{i + 1}</td>
-							<td>{record.username}</td>
-							<td>{formatTime(record.time / 1000)}s</td>
-							<td>{record.moves}</td>
-							<td>{record.seed}</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
-	{/if}
 </div>
 
+{#if data.records.length === 0}
+	<p>No records yet.</p>
+{:else}
+	<table>
+		<thead>
+			<tr>
+				<th>Place</th>
+				<th>Player</th>
+				<th>Time</th>
+				<th>Number of moves</th>
+				<th>Seed</th>
+			</tr>
+		</thead>
+		<tbody>
+			{#each data.records as record, i}
+				<tr>
+					<td>{i + 1}</td>
+					<td>{record.username}</td>
+					<td>{(record.time / 1000).toFixed(3)} s</td>
+					<td>{record.moves}</td>
+					<td>{record.seed}</td>
+				</tr>
+			{/each}
+		</tbody>
+	</table>
+{/if}
+
 <style>
-	.leaderboard-page {
-		max-width: 700px;
-		margin: 2rem auto;
-		padding: 0 1rem;
-		text-align: center;
-	}
-
-	.title {
+	h1, h2 {
+		margin: 0 0 10px 0;
 		color: var(--primary-color);
-		margin-bottom: 0.25rem;
 	}
-
-	.subtitle {
-		color: var(--text-color);
-		opacity: 0.8;
-		margin-top: 0;
-		margin-bottom: 1.5rem;
-	}
-
-	.nav-controls {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		gap: 0.5rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.nav-controls button {
-		width: 40px;
-		height: 40px;
-		padding: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 1.2em;
-		border-radius: 8px;
-	}
-
-	.nav-controls input {
-		width: 70px;
-		height: 40px;
-		text-align: center;
-		font-size: 1em;
-		border-radius: 8px;
-		border: 1px solid #ccc;
-		outline: none;
-		background: var(--panel-bg);
-		color: var(--text-color);
-	}
-
-	.nav-controls input:focus {
-		border-color: var(--primary-color);
-		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-	}
-
-	.empty-state {
-		color: var(--text-color);
-		opacity: 0.6;
-		font-style: italic;
-		margin-top: 2rem;
-	}
-
-	.table-wrapper {
-		background: var(--panel-bg);
-		border-radius: 12px;
-		overflow: hidden;
-	}
+	h2 { font-weight: normal; }
 
 	table {
 		width: 100%;
 		border-collapse: collapse;
+		margin-top: 20px;
+		background: var(--panel-bg);
+		border-radius: 12px;
+		overflow: hidden;
+		box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+	}
+
+	th, td {
+		padding: 12px 10px;
 		text-align: center;
 	}
 
 	th {
-		padding: 12px 16px;
-		font-weight: 600;
-		border-bottom: 2px solid var(--hover-bg);
-	}
-
-	td {
-		padding: 10px 16px;
-	}
-
-	tbody tr:hover {
 		background: var(--hover-bg);
+		font-weight: 600;
+	}
+
+	tbody tr:hover { background: var(--hover-bg); }
+	tbody td { border-bottom: 1px solid var(--bg-color); }
+
+	.title-controls {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 20px;
+		flex-wrap: wrap;
+	}
+
+	.buttons {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.buttons input[type="number"] {
+		width: 60px;
+		text-align: center;
+	}
+
+	input[type="number"] {
+		padding: 10px 14px;
+		font-size: 1em;
+		border-radius: 8px;
+		background-color: var(--input-bg);
+		border: 1px solid var(--panel-bg);
+		color: var(--text-color);
+		outline: none;
+		width: 60px;
+		text-align: center;
+	}
+	input[type="number"]:hover { border-color: var(--primary-color); }
+	input[type="number"]:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+
+	@media (max-width: 650px) {
+		h1 { font-size: 1.5em; }
+		h2 { font-size: 1.2em; }
+		table, th, td { font-size: 0.9em; }
+		th, td { padding: 8px 6px; }
 	}
 </style>

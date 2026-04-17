@@ -410,125 +410,13 @@
   }}
 />
 
-<div class="page-wrapper">
-  <!-- Auth Section -->
-  <div class="auth-bar">
-    {#if user}
-      <span class="auth-user">Logged in as <strong>{user.username}</strong></span>
-      <button class="auth-btn" onclick={handleLogout}>Log out</button>
-    {:else}
-      <button
-        class="auth-btn"
-        onclick={() => {
-          authMode = 'login';
-          showAuthModal = true;
-        }}
-      >
-        Log in
-      </button>
-    {/if}
-  </div>
-
-  <div class="main-layout">
-    <!-- Records Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h3>{showCompletions ? 'Completions:' : 'Records (s):'}</h3>
-        <button class="toggle-btn" onclick={() => (showCompletions = !showCompletions)}>
-          {showCompletions ? 'Records' : 'Completions'}
-        </button>
-      </div>
-      <div class="records-list">
-        {#each difficulties as d}
-          <div class="record-row">
-            <a
-              class="icon-link"
-              href="/leaderboard?difficulty={d}"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Leaderboard for difficulty {d}"
-            >&#x1F3C6;</a>
-            <a
-              class="icon-link"
-              href="/completions?difficulty={d}"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Completions for difficulty {d}"
-            >&#x1F4CA;</a>
-            <span class="record-text">
-              {#if showCompletions}
-                {d}: {localCompletions[d] || 0}
-              {:else if localRecords[d]}
-                {d}: {formatRecordTime(localRecords[d].time)}
-              {:else}
-                {d}: --:--.---
-              {/if}
-            </span>
-          </div>
-        {/each}
-      </div>
-    </aside>
-
-    <!-- Game Area -->
-    <main class="game-area">
-      {#if gameState === 'menu'}
-        <div class="menu-screen">
-          <h1 class="game-title">Sort16</h1>
-          <div class="menu-controls">
-            <label class="diff-label">
-              Difficulty:
-              <select bind:value={difficulty}>
-                {#each difficulties as d}
-                  <option value={d}>{d}</option>
-                {/each}
-              </select>
-            </label>
-            <button class="play-btn" onclick={startGame}>Play</button>
-            <button class="tutorial-btn" onclick={openTutorial}>Tutorial</button>
-          </div>
-        </div>
-      {:else}
-        <div class="game-screen">
-          <div class="game-info">
-            <span class="game-difficulty">Difficulty: {difficulty} characters</span>
-            <span class="game-timer">{formattedTime}</span>
-          </div>
-
-          <div class="game-display">
-            <pre class="bracket-display">{displayString}</pre>
-          </div>
-
-          {#if isMobile}
-            <div class="mobile-controls">
-              <div class="control-row">
-                <button class="mobile-btn" onclick={moveBracketLeft}>A<br /><small>Bracket Left</small></button>
-                <button class="mobile-btn" onclick={moveBracketRight}>D<br /><small>Bracket Right</small></button>
-              </div>
-              <div class="control-row">
-                <button class="mobile-btn shift-btn" onclick={shiftLeft}>&larr;<br /><small>Shift Left</small></button>
-                <button class="mobile-btn shift-btn" onclick={shiftRight}>&rarr;<br /><small>Shift Right</small></button>
-              </div>
-            </div>
-          {/if}
-
-          <div class="game-actions">
-            <button onclick={restartGame}>Restart</button>
-            <button onclick={goToMenu}>Main Menu</button>
-            <button class="reveal-btn" onclick={revealSolution}>Reveal Solution</button>
-          </div>
-        </div>
-      {/if}
-    </main>
-  </div>
-</div>
-
-<!-- Auth Modal -->
+<!-- Auth Modals -->
 {#if showAuthModal}
-  <div class="overlay" onclick={() => (showAuthModal = false)} role="presentation">
+  <div class="auth-modal active" role="presentation">
     <!-- svelte-ignore a11y_interactive_supports_focus -->
     <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-      <h2>{authMode === 'login' ? 'Log In' : 'Create Account'}</h2>
+    <div class="auth-modal-content" role="dialog" aria-modal="true" onclick={(e) => e.stopPropagation()}>
+      <h2>{authMode === 'login' ? 'Login' : 'Create Account'}</h2>
       <form
         onsubmit={(e) => {
           e.preventDefault();
@@ -548,607 +436,701 @@
           autocomplete={authMode === 'login' ? 'current-password' : 'new-password'}
         />
         <button type="submit" disabled={authLoading}>
-          {authLoading ? 'Loading...' : authMode === 'login' ? 'Log In' : 'Create Account'}
+          {authLoading ? 'Loading...' : authMode === 'login' ? 'Login' : 'Create Account'}
         </button>
       </form>
-      <p class="auth-switch">
+      <p>
         {#if authMode === 'login'}
           Don't have an account?
-          <button class="link-btn" onclick={() => (authMode = 'signup')}>Sign up</button>
+          <!-- svelte-ignore a11y_interactive_supports_focus -->
+          <!-- svelte-ignore a11y_click_events_have_key_events -->
+          <span class="link" role="button" onclick={() => (authMode = 'signup')}>Create one</span>
         {:else}
           Already have an account?
-          <button class="link-btn" onclick={() => (authMode = 'login')}>Log in</button>
+          <!-- svelte-ignore a11y_interactive_supports_focus -->
+          <!-- svelte-ignore a11y_click_events_have_key_events -->
+          <span class="link" role="button" onclick={() => (authMode = 'login')}>Login</span>
         {/if}
       </p>
     </div>
   </div>
 {/if}
 
-<!-- Win Popup -->
-{#if showWinPopup}
-  <div class="overlay" role="presentation">
-    <div class="win-card" role="dialog" aria-modal="true">
-      <h2 class="win-title">YOU WIN!</h2>
-      <table class="win-stats">
-        <tbody>
-          <tr>
-            <td>Difficulty</td>
-            <td>{difficulty}</td>
-          </tr>
-          <tr>
-            <td>Time</td>
-            <td>{winTime.toFixed(3)}s</td>
-          </tr>
-          <tr>
-            <td>Moves</td>
-            <td>{winMoves}</td>
-          </tr>
-          <tr>
-            <td>Seed</td>
-            <td class="seed-cell">{seed}</td>
-          </tr>
-          <tr>
-            <td>Record</td>
-            <td>
-              {#if isNewRecord}
-                <span class="new-record-badge">New best!</span>
-              {:else}
-                {localRecords[difficulty]
-                  ? formatRecordTime(localRecords[difficulty].time)
-                  : winTime.toFixed(3) + 's'}
-              {/if}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <button class="play-again-btn" onclick={startGame}>Play again</button>
-    </div>
+<!-- Records Sidebar -->
+<div class="records">
+  <div class="records-header">
+    <h2>{showCompletions ? 'Completions:' : 'Records (s):'}</h2>
+    <button onclick={() => (showCompletions = !showCompletions)}>
+      {showCompletions ? 'Records' : 'Completions'}
+    </button>
   </div>
-{/if}
+  <div id="record-list">
+    {#each difficulties as d}
+      <p class="record-label">
+        <button
+          class="trophy-btn"
+          onclick={() => window.open(`/leaderboard?difficulty=${d}`, '_blank')}
+          title="Leaderboard for difficulty {d}"
+        >&#x1F3C6;</button>
+        <button
+          class="leaderboard-btn"
+          onclick={() => window.open(`/completions?difficulty=${d}`, '_blank')}
+          title="Completions for difficulty {d}"
+        >&#x1F4CA;</button>
+        <span>
+          {#if showCompletions}
+            {d}: {localCompletions[d] || 0}
+          {:else if localRecords[d]}
+            {d}: {formatRecordTime(localRecords[d].time)}
+          {:else}
+            {d}: --:--.---
+          {/if}
+        </span>
+      </p>
+    {/each}
+  </div>
+</div>
 
-<!-- Tutorial Modal -->
-{#if showTutorial}
-  <div class="overlay" onclick={() => (showTutorial = false)} role="presentation">
-    <!-- svelte-ignore a11y_interactive_supports_focus -->
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <div class="modal tutorial-modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-      <h2>Tutorial</h2>
+<!-- Main Menu / Game Area -->
+<div class="mainmenu">
+  <div class="mainmenu-header">
+    {#if user}
+      <p id="loggedin">Logged in as <strong>{user.username}</strong></p>
+      <button id="logout" class="logout-btn" onclick={handleLogout}>Log out</button>
+    {:else}
+      <button onclick={() => { authMode = 'login'; showAuthModal = true; }}>Log in</button>
+    {/if}
+    <h1 id="mainheader">Sort16</h1>
+  </div>
 
-      {#if tutorialCompleted && tutorialStage === 0}
-        <p class="tut-complete">Tutorial already completed!</p>
-        <button onclick={() => (showTutorial = false)}>Close</button>
-      {:else if tutorialCompleted}
-        <p class="tut-complete">Tutorial complete! You've got it.</p>
-        <button onclick={() => (showTutorial = false)}>Close</button>
-      {:else}
-        <div class="tut-controls-info">
-          <p>Use these controls to sort the characters in order:</p>
-          <div class="key-row">
-            <kbd>A</kbd> Move bracket left
-          </div>
-          <div class="key-row">
-            <kbd>D</kbd> Move bracket right
-          </div>
-          <div class="key-row">
-            <kbd>&larr;</kbd> Shift characters in bracket left
-          </div>
-          <div class="key-row">
-            <kbd>&rarr;</kbd> Shift characters in bracket right
-          </div>
+  {#if gameState === 'menu'}
+    <h2 id="difficulty">Difficulty</h2>
+    <h3 class="label1">Select character number (8-36):</h3>
+    <select bind:value={difficulty}>
+      {#each difficulties as d}
+        <option value={d}>{d}</option>
+      {/each}
+    </select>
+    <button onclick={startGame} id="play">Play</button>
+    <button onclick={openTutorial} id="tutorialBtn">Tutorial</button>
+  {:else}
+    <h2>{formattedTime}</h2>
+    <p id="main">{displayString}</p>
+    <div id="button-container">
+      <button onclick={restartGame}>Restart</button>
+      <button onclick={goToMenu}>Main menu</button>
+      <button onclick={revealSolution}>Reveal solution</button>
+    </div>
+    <span id="solution"></span>
+
+    {#if isMobile}
+      <div class="mobileControls">
+        <h2>Mobile Controls:</h2>
+        <div>
+          <p>Brackets:</p>
+          <button onclick={moveBracketLeft}>Left</button>
+          <button onclick={moveBracketRight}>Right</button>
+          <p>Characters:</p>
+          <button onclick={shiftLeft}>Shift left</button>
+          <button onclick={shiftRight}>Shift right</button>
         </div>
+      </div>
+    {/if}
+  {/if}
 
-        <div class="tut-stage">
-          <h3>Stage {tutorialStage} of 2</h3>
-          <p>
-            Sort: <strong>{TEMPLATE.slice(0, tutorialStage === 1 ? 4 : 6)}</strong>
-            (bracket size: {tutBracketSize})
+  <!-- Tutorial Modal -->
+  {#if showTutorial}
+    <div class="modal" style="display: block;" role="presentation">
+      <!-- svelte-ignore a11y_interactive_supports_focus -->
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <div class="modal-content" role="dialog" aria-modal="true" onclick={(e) => e.stopPropagation()}>
+        <!-- svelte-ignore a11y_interactive_supports_focus -->
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <span class="close" role="button" onclick={() => (showTutorial = false)}>&times;</span>
+        <h2>How to Play</h2>
+
+        {#if tutorialCompleted}
+          <p id="tutorial_string" style="font-size: 14px;">
+            {#if tutorialStage === 0}
+              Tutorial already completed!
+            {:else}
+              Tutorial completed! Now go ahead and try 8 characters! If you're stuck, search sort16 solution on YouTube!
+            {/if}
           </p>
-          <pre class="bracket-display tut-display">{tutDisplayString}</pre>
-          <p class="tut-moves">Moves: {tutMoves}</p>
+        {:else}
+          <p>Welcome to <strong>Sort16</strong>!</p>
+          <div class="tutorial-row">
+            <span class="key">A</span>
+            <span class="text">Moves the bracket to the left</span>
+          </div>
+          <div class="tutorial-row">
+            <span class="key">D</span>
+            <span class="text">Moves the bracket to the right</span>
+          </div>
+          <div class="tutorial-row">
+            <span class="key">&#8592;</span>
+            <span class="text">Shift characters inside the bracket left</span>
+          </div>
+          <div class="tutorial-row">
+            <span class="key">&#8594;</span>
+            <span class="text">Shift characters inside the bracket right</span>
+          </div>
+
+          <h2 id="goal">Goal</h2>
+          <p id="scrambled">Sort the scrambled into the original form - 0-9,A-Z!</p>
+          <p id="try">Here, try it out:</p>
+          <p id="tutorial_string">{tutDisplayString}</p>
 
           {#if isMobile}
-            <div class="mobile-controls tut-mobile">
-              <div class="control-row">
-                <button class="mobile-btn" onclick={tutMoveBracketLeft}>A</button>
-                <button class="mobile-btn" onclick={tutMoveBracketRight}>D</button>
+            <div class="mobileControls" style="margin-top: 20px;">
+              <div>
+                <button onclick={tutMoveBracketLeft}>A</button>
+                <button onclick={tutMoveBracketRight}>D</button>
               </div>
-              <div class="control-row">
-                <button class="mobile-btn shift-btn" onclick={tutShiftLeft}>&larr;</button>
-                <button class="mobile-btn shift-btn" onclick={tutShiftRight}>&rarr;</button>
+              <div>
+                <button onclick={tutShiftLeft}>&#8592;</button>
+                <button onclick={tutShiftRight}>&#8594;</button>
               </div>
             </div>
           {/if}
-        </div>
-      {/if}
+        {/if}
+      </div>
     </div>
-  </div>
-{/if}
+  {/if}
+
+  <!-- Win Popup -->
+  {#if showWinPopup}
+    <div class="popup" role="presentation">
+      <div class="popup-content" role="dialog" aria-modal="true">
+        <!-- svelte-ignore a11y_interactive_supports_focus -->
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <span class="close" role="button" onclick={() => { showWinPopup = false; goToMenu(); }}>&times;</span>
+        <h1>YOU WIN!</h1>
+        <table class="popup-stats">
+          <tbody>
+            <tr>
+              <th class="left">Difficulty</th>
+              <th class="right">Time</th>
+            </tr>
+            <tr>
+              <td class="left">{difficulty}</td>
+              <td class="right">{winTime.toFixed(3)}s</td>
+            </tr>
+            <tr>
+              <th class="left">Moves</th>
+              <th class="right">Seed</th>
+            </tr>
+            <tr>
+              <td class="left">{winMoves}</td>
+              <td class="right">{seed}</td>
+            </tr>
+            <tr>
+              <th class="left" colspan="2">Record</th>
+            </tr>
+            <tr>
+              <td colspan="2">
+                {#if isNewRecord}
+                  <span>{winTime.toFixed(3)}s</span>
+                  <span class="new-best">New best!</span>
+                {:else}
+                  <span>
+                    {localRecords[difficulty]
+                      ? formatRecordTime(localRecords[difficulty].time)
+                      : winTime.toFixed(3) + 's'}
+                  </span>
+                {/if}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="popup-buttons">
+          <button onclick={() => { showWinPopup = false; startGame(); }}>Play again</button>
+        </div>
+      </div>
+    </div>
+  {/if}
+</div>
 
 <style>
-  /* ====== Page Layout ====== */
-  .page-wrapper {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .auth-bar {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 12px;
-    padding: 12px 70px 12px 20px;
-  }
-
-  .auth-user {
-    font-size: 0.95em;
-  }
-
-  .auth-btn {
-    padding: 6px 16px;
-    font-size: 0.9em;
-  }
-
-  .main-layout {
-    display: flex;
-    flex: 1;
-    gap: 20px;
-    padding: 0 20px 20px;
-  }
-
-  /* ====== Sidebar ====== */
-  .sidebar {
-    width: 280px;
-    min-width: 280px;
+  /* ====== Records Sidebar ====== */
+  .records {
+    width: 20vw;
+    height: 90vh;
+    margin-right: 20px;
     background: var(--panel-bg);
     border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-    padding: 16px;
-    max-height: calc(100vh - 80px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 20px;
     overflow-y: auto;
-    order: 0;
+    transition: background 0.3s;
   }
 
-  .sidebar-header {
+  .records h2 {
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    padding-left: 35px;
+    color: var(--text-color);
+  }
+
+  .records :global(p) {
+    font-size: 1em;
+    margin: 8px 0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .records :global(p:hover) {
+    background: var(--hover-bg);
+    cursor: pointer;
+  }
+
+  .records-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: 5px;
   }
 
-  .sidebar-header h3 {
-    margin: 0;
-    font-size: 1.05em;
+  .records-header button:hover {
+    opacity: 0.8;
   }
 
-  .toggle-btn {
-    padding: 4px 10px;
-    font-size: 0.8em;
-    border-radius: 6px;
-  }
-
-  .records-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .record-row {
+  .record-label {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 6px;
-    border-radius: 6px;
-    font-size: 0.92em;
-    font-family: var(--font-mono);
-    transition: background 0.15s;
   }
 
-  .record-row:hover {
-    background: var(--hover-bg);
-  }
-
-  .icon-link {
-    text-decoration: none;
-    font-size: 0.85em;
-    line-height: 1;
-  }
-
-  .record-text {
-    flex: 1;
-  }
-
-  /* ====== Game Area ====== */
-  .game-area {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 500px;
-  }
-
-  .menu-screen {
-    text-align: center;
-  }
-
-  .game-title {
-    font-size: 3.5em;
-    margin: 0 0 30px;
-    letter-spacing: 2px;
-  }
-
-  .menu-controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .diff-label {
-    font-size: 1.1em;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .play-btn {
-    font-size: 1.3em;
-    padding: 14px 50px;
-    border-radius: 12px;
-  }
-
-  .tutorial-btn {
-    background: transparent;
-    color: var(--text-color);
-    border: 2px solid var(--primary-color);
-    font-size: 1em;
-    padding: 10px 30px;
-  }
-
-  .tutorial-btn:hover {
-    background: var(--primary-color);
-    color: white;
-  }
-
-  /* ====== In-Game ====== */
-  .game-screen {
-    width: 100%;
-    text-align: center;
-    padding: 20px;
-  }
-
-  .game-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    font-size: 1.1em;
-  }
-
-  .game-timer {
-    font-family: var(--font-mono);
-    font-size: 1.4em;
-    font-weight: bold;
-  }
-
-  .game-display {
-    margin: 20px 0;
-    overflow-x: auto;
-  }
-
-  .bracket-display {
-    font-family: var(--font-mono);
-    font-size: 2em;
-    letter-spacing: 0.05em;
-    margin: 0;
-    white-space: pre;
-    user-select: none;
-    text-align: center;
-  }
-
-  .game-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 30px;
-  }
-
-  .reveal-btn {
-    background: #e67e22;
-  }
-
-  .reveal-btn:hover {
-    background: #d35400;
-  }
-
-  /* ====== Mobile Controls ====== */
-  .mobile-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin: 20px auto;
-    max-width: 320px;
-  }
-
-  .control-row {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-  }
-
-  .mobile-btn {
-    flex: 1;
-    padding: 16px 10px;
-    font-size: 1.1em;
-    border-radius: 12px;
-    max-width: 150px;
-  }
-
-  .shift-btn {
-    background: #8b5cf6;
-  }
-
-  .shift-btn:hover {
-    background: #7c3aed;
-  }
-
-  /* ====== Overlays / Modals ====== */
-  .overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 500;
-  }
-
-  .modal {
-    background: var(--panel-bg);
-    border-radius: 16px;
-    padding: 30px;
-    width: 90%;
-    max-width: 420px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-  }
-
-  .modal h2 {
-    margin-top: 0;
-    text-align: center;
-  }
-
-  .modal form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .modal input {
-    padding: 12px 14px;
-    font-size: 1em;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    outline: none;
-    background: var(--bg-color);
-    color: var(--text-color);
-  }
-
-  .modal input:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-  }
-
-  .auth-switch {
-    text-align: center;
-    margin-top: 12px;
-    font-size: 0.9em;
-  }
-
-  .link-btn {
-    background: none;
-    border: none;
-    color: var(--primary-color);
+  .trophy-btn, .leaderboard-btn {
     cursor: pointer;
+    border: none;
+    background: transparent;
+    font-size: 1em;
     padding: 0;
-    font-size: inherit;
-    text-decoration: underline;
   }
 
-  .link-btn:hover {
-    background: none;
-    transform: none;
+  .trophy-btn:hover, .leaderboard-btn:hover {
+    transform: scale(1.3);
+    background: transparent;
   }
 
-  /* ====== Win Popup ====== */
-  .win-card {
+  .records::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .records::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  .records::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+
+  .records::-webkit-scrollbar-thumb:hover {
+    background: #a0a0a0;
+  }
+
+  /* ====== Main Menu ====== */
+  .mainmenu {
+    flex: 1;
     background: var(--panel-bg);
-    border-radius: 16px;
-    padding: 40px;
-    text-align: center;
-    width: 90%;
-    max-width: 420px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-    animation: winAppear 0.3s ease-out;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    transition: background 0.3s;
   }
 
-  @keyframes winAppear {
-    from {
-      opacity: 0;
-      transform: scale(0.8);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+  .mainmenu h1, .mainmenu h3 {
+    color: var(--text-color);
   }
 
-  .win-title {
-    color: #2ecc71;
-    font-size: 2.2em;
-    margin: 0 0 20px;
-  }
-
-  .win-stats {
+  .mainmenu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 24px;
-    text-align: left;
+    position: relative;
+    margin-top: 20px;
   }
 
-  .win-stats td {
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--hover-bg);
+  .mainmenu-header h1 {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    font-size: 2em;
+    text-align: center;
   }
 
-  .win-stats tr td:first-child {
-    font-weight: 600;
-    width: 40%;
-  }
-
-  .seed-cell {
-    font-family: var(--font-mono);
-    font-size: 0.85em;
-    word-break: break-all;
-  }
-
-  .new-record-badge {
-    background: #e67e22;
-    color: white;
-    padding: 3px 10px;
-    border-radius: 6px;
-    font-size: 0.9em;
-    font-weight: 600;
-  }
-
-  .play-again-btn {
-    font-size: 1.2em;
-    padding: 12px 40px;
-  }
-
-  /* ====== Tutorial Modal ====== */
-  .tutorial-modal {
-    max-width: 520px;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-
-  .tut-controls-info {
+  .mainmenu-header button {
+    margin-right: auto;
     margin-bottom: 20px;
   }
 
-  .key-row {
+  .logout-btn {
+    height: 2em;
+    line-height: 0.5em;
+    font-size: 0.8em;
+    margin-top: 1.2vw;
+    margin-left: 1vw;
+  }
+
+  #loggedin {
+    margin-top: 1.2vw;
+    font-size: 0.9em;
+  }
+
+  /* ====== Game String Display ====== */
+  #main {
+    font-size: 2em;
+    font-family: 'Courier New', Courier, monospace;
+    margin-top: 30px;
+    word-break: break-word;
+    color: var(--text-color);
+    white-space: pre-wrap;
+  }
+
+  #button-container {
+    display: flex;
+    gap: 10px;
+  }
+
+  /* ====== Mobile Controls ====== */
+  .mobileControls {
+    margin-top: 150px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .mobileControls div {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .mobileControls button {
+    height: 100px;
+    width: 150px;
+    font-size: 20px;
+  }
+
+  .mobileControls p {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 28px;
+    justify-content: center;
+    align-self: center;
+  }
+
+  /* ====== Tutorial Modal ====== */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 200;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background: rgba(0, 0, 0, 0.6);
+  }
+
+  .modal-content {
+    background: var(--panel-bg);
+    color: var(--text-color);
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 12px;
+    display: block;
+    width: 80%;
+    max-width: 500px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-content h2 {
+    margin-top: 0;
+    color: var(--primary-color);
+  }
+
+  .close {
+    float: right;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: var(--text-color);
+  }
+
+  .close:hover {
+    color: var(--primary-color);
+  }
+
+  .tutorial-row {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 6px 0;
-    font-size: 0.95em;
+    margin: 8px 0;
   }
 
-  kbd {
-    display: inline-block;
-    padding: 4px 10px;
-    font-family: var(--font-mono);
-    font-size: 0.9em;
-    background: var(--hover-bg);
-    border: 1px solid #999;
-    border-radius: 5px;
-    min-width: 32px;
+  .key {
+    background-color: #666a72;
+    border: 3px solid #1f2937;
+    border-radius: 4px;
+    padding: 4px 8px;
+    min-width: 24px;
     text-align: center;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    color: white;
+    font-weight: bold;
+    flex-shrink: 0;
   }
 
-  .tut-stage {
-    border-top: 1px solid var(--hover-bg);
-    padding-top: 16px;
+  .text {
+    flex: 1;
   }
 
-  .tut-stage h3 {
-    margin: 0 0 8px;
-  }
-
-  .tut-display {
-    font-size: 1.6em;
-  }
-
-  .tut-moves {
-    font-size: 0.9em;
-    color: var(--placeholder-color);
-  }
-
-  .tut-complete {
+  #tutorial_string {
     text-align: center;
-    font-size: 1.1em;
-    color: var(--success-color);
-    font-weight: 600;
-    margin: 20px 0;
+    font-weight: 700;
+    font-size: 1.5em;
+    margin: 0;
+    white-space: pre-wrap;
+    margin-top: 10px;
   }
 
-  .tut-mobile {
-    margin: 10px auto;
+  #goal {
+    margin-top: 10px;
+  }
+
+  #scrambled {
+    margin: 0;
+  }
+
+  #try {
+    margin: 0;
+  }
+
+  /* ====== Win Popup ====== */
+  .popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+
+  .popup-content {
+    background: var(--bg-color);
+    border-radius: 15px;
+    padding: 30px 40px;
+    text-align: center;
+    width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    color: var(--text-color);
+    animation: popupFade 0.7s ease-out;
+    position: relative;
+  }
+
+  .popup-content h1 {
+    color: #2ecc71;
+    margin-bottom: 20px;
+  }
+
+  .popup-stats {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px auto 0;
+    font-size: 16px;
+    text-align: left;
+  }
+
+  .popup-stats th,
+  .popup-stats td {
+    padding: 8px 12px;
+  }
+
+  .popup-stats :global(th.left),
+  .popup-stats :global(td.left) {
+    text-align: left;
+  }
+
+  .popup-stats :global(th.right),
+  .popup-stats :global(td.right) {
+    text-align: right;
+  }
+
+  .popup-stats th {
+    padding-bottom: 3px;
+  }
+
+  .popup-stats td {
+    padding-top: 3px;
+  }
+
+  .popup-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .popup-buttons button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: #3498db;
+    color: white;
+    transition: 0.2s;
+  }
+
+  .popup-buttons button:hover {
+    background: #2980b9;
+  }
+
+  .new-best {
+    background: orange;
+    color: black;
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 12px;
+    margin-left: 6px;
+  }
+
+  /* ====== Auth Modal ====== */
+  .auth-modal {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+  }
+
+  .auth-modal.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  .auth-modal-content {
+    background: var(--panel-bg, #fff);
+    color: var(--text-color, #333);
+    padding: 30px 40px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+  }
+
+  .auth-modal-content input {
+    width: 80%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 6px;
+    border: 1px solid var(--panel-bg);
+    background-color: var(--hover-bg);
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .auth-modal-content form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .auth-modal-content button {
+    padding: 10px 20px;
+    margin-top: 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background: var(--primary-color, #3b82f6);
+    color: white;
+    font-size: 1em;
+  }
+
+  .auth-modal-content .link {
+    color: var(--primary-color, #3b82f6);
+    cursor: pointer;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    font-size: inherit;
+    padding: 0;
   }
 
   /* ====== Responsive ====== */
   @media (max-width: 1200px) {
-    .main-layout {
-      flex-direction: column;
-    }
-
-    .sidebar {
+    .records {
       width: 100%;
-      min-width: unset;
-      max-height: 300px;
-      order: 1;
+      height: auto;
+      margin: 0;
+      order: 2;
+      margin-top: 20px;
     }
 
-    .game-area {
-      order: 0;
-      min-height: 400px;
+    .mainmenu {
+      width: 100%;
+      order: 1;
     }
   }
 
   @media (max-width: 650px) {
-    .game-title {
-      font-size: 2.2em;
+    .mainmenu h1 {
+      font-size: 1.8em;
     }
 
-    .bracket-display {
-      font-size: 1.3em;
+    .mainmenu h3.label1 {
+      font-size: 1em;
+      text-align: center;
     }
 
-    .game-timer {
-      font-size: 1.1em;
+    #main {
+      font-size: 1.5em;
+      word-break: break-word;
+      text-align: center;
     }
 
-    .game-info {
-      flex-direction: column;
+    .mobileControls {
+      margin-top: 20px;
       gap: 8px;
-      font-size: 0.95em;
     }
 
-    .game-actions button {
+    .mobileControls div {
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .mobileControls button {
       width: 100%;
+      height: 60px;
+      font-size: 16px;
     }
 
-    .play-btn {
-      width: 100%;
-      font-size: 1.1em;
-    }
-
-    .auth-bar {
-      padding-right: 60px;
-    }
-
-    .win-card {
-      padding: 24px;
-    }
-
-    .win-title {
-      font-size: 1.6em;
-    }
-
-    .mobile-controls {
-      display: flex;
+    .mobileControls p {
+      font-size: 20px;
     }
   }
 </style>

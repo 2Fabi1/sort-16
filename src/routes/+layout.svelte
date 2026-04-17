@@ -6,12 +6,12 @@
   let { children } = $props();
 
   let dark = $state(false);
-  let toast = $state<{ message: string; type: 'success' | 'error'; visible: boolean }>({
+  let notification = $state<{ message: string; type: 'success' | 'error'; visible: boolean }>({
     message: '',
     type: 'success',
     visible: false
   });
-  let toastTimer: ReturnType<typeof setTimeout> | undefined;
+  let notificationTimer: ReturnType<typeof setTimeout> | undefined;
 
   $effect(() => {
     const stored = localStorage.getItem('theme');
@@ -33,10 +33,10 @@
   }
 
   function showNotification(message: string, type: 'success' | 'error' = 'success') {
-    if (toastTimer) clearTimeout(toastTimer);
-    toast = { message, type, visible: true };
-    toastTimer = setTimeout(() => {
-      toast.visible = false;
+    if (notificationTimer) clearTimeout(notificationTimer);
+    notification = { message, type, visible: true };
+    notificationTimer = setTimeout(() => {
+      notification.visible = false;
     }, 3000);
   }
 
@@ -47,81 +47,79 @@
   <link rel="icon" href={favicon} />
 </svelte:head>
 
-<button class="theme-toggle" onclick={toggleTheme} aria-label="Toggle dark mode">
-  {#if dark}
-    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-  {:else}
-    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-  {/if}
+<button id="darkModeToggle" onclick={toggleTheme} aria-label="Toggle dark mode">
+  {dark ? '🌞' : '🌙'}
 </button>
 
-<div class="toast-container" class:visible={toast.visible}>
-  <div class="toast" class:success={toast.type === 'success'} class:error={toast.type === 'error'}>
-    {toast.message}
-  </div>
+<div
+  id="authNotification"
+  class={notification.type}
+  class:visible={notification.visible}
+>
+  {notification.message}
 </div>
 
 {@render children()}
 
 <style>
-  .theme-toggle {
+  #darkModeToggle {
     position: fixed;
-    top: 12px;
-    right: 12px;
-    z-index: 1000;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    background: var(--panel-bg);
+    border: none;
+    border-radius: 50%;
     width: 45px;
     height: 45px;
-    border-radius: 50%;
+    font-size: 1.2em;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
-    border: none;
     cursor: pointer;
-    transition: background 0.3s, color 0.3s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    transition: background 0.3s, transform 0.2s;
+    padding: 0;
+  }
+
+  :global([data-theme='light']) #darkModeToggle {
     background: #3e4753;
     color: #f5f5f5;
   }
 
-  :global([data-theme='dark']) .theme-toggle {
+  :global([data-theme='dark']) #darkModeToggle {
     background: #9da3ad;
     color: #1f2937;
   }
 
-  .theme-toggle:hover {
-    transform: translateY(-2px);
+  #darkModeToggle:hover {
+    transform: scale(1.1);
   }
 
-  .toast-container {
+  #authNotification {
     position: fixed;
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 2000;
+    z-index: 100000;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    color: #fff;
     opacity: 0;
-    transition: opacity 0.3s ease;
     pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
   }
 
-  .toast-container.visible {
+  #authNotification.visible {
     opacity: 1;
   }
 
-  .toast {
-    padding: 12px 24px;
-    border-radius: 8px;
-    color: white;
-    font-weight: 600;
-    font-size: 0.95em;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
-
-  .toast.success {
+  #authNotification.success {
     background: #16a34a;
   }
 
-  .toast.error {
+  #authNotification.error {
     background: #dc2626;
   }
 </style>
